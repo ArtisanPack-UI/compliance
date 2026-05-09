@@ -98,15 +98,21 @@ trait Auditable
         $original = array_diff_key( $original, array_flip( $excluded ) );
 
         $data = [
-            'model'      => static::class,
-            'model_id'   => $this->getKey(),
-            'event'      => $event,
-            'user_id'    => Auth::id(),
-            'user_type'  => Auth::check() ? get_class( Auth::user() ) : null,
-            'ip_address' => request()?->ip(),
-            'user_agent' => request()?->userAgent(),
-            'timestamp'  => now()->toIso8601String(),
+            'model'     => static::class,
+            'model_id'  => $this->getKey(),
+            'event'     => $event,
+            'user_id'   => Auth::id(),
+            'user_type' => Auth::check() ? get_class( Auth::user() ) : null,
+            'timestamp' => now()->toIso8601String(),
         ];
+
+        // IP / user-agent are personal data under most regimes — keep
+        // them off the audit payload by default and let apps opt in
+        // when their compliance posture allows it.
+        if ( (bool) config( 'artisanpack.compliance.privacy_by_design.audit_include_request_metadata', false ) ) {
+            $data['ip_address'] = request()?->ip();
+            $data['user_agent'] = request()?->userAgent();
+        }
 
         if ( ! empty( $changes ) ) {
             $data['changes'] = $changes;

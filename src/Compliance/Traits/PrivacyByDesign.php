@@ -245,6 +245,18 @@ trait PrivacyByDesign
             // Otherwise → treat as plaintext and encrypt.
             $value = $this->attributes[ $attribute ];
 
+            // Crypt::encryptString and looksLikeEncryptedPayload both
+            // require a string (declare(strict_types=1) is on for this
+            // trait). Coerce scalars to string and skip values that
+            // can't be coerced (arrays, objects, resources) rather
+            // than throwing a TypeError mid-save.
+            if ( ! is_string( $value ) ) {
+                if ( ! is_scalar( $value ) ) {
+                    continue;
+                }
+                $value = (string) $value;
+            }
+
             if ( $this->looksLikeEncryptedPayload( $value ) ) {
                 try {
                     Crypt::decryptString( $value );
@@ -296,8 +308,18 @@ trait PrivacyByDesign
             return null;
         }
 
+        $value = $this->attributes[ $attribute ];
+
+        // Skip values that aren't a Laravel encrypted payload at all —
+        // an unsaved model or a redacted placeholder ('[REDACTED]')
+        // would otherwise log a warning on every read despite the
+        // caller already handling the null return gracefully.
+        if ( ! is_string( $value ) || ! $this->looksLikeEncryptedPayload( $value ) ) {
+            return null;
+        }
+
         try {
-            return Crypt::decryptString( $this->attributes[ $attribute ] );
+            return Crypt::decryptString( $value );
         } catch ( Exception $e ) {
             Log::warning( "Failed to decrypt attribute {$attribute}", [
                 'model' => static::class,

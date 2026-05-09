@@ -80,6 +80,7 @@ class ConsentManager
                 'user_agent'         => $options['user_agent'] ?? request()->userAgent(),
                 'proof_reference'    => $options['proof_reference'] ?? null,
                 'granular_choices'   => $options['granular_choices'] ?? null,
+                'granted_at'         => now(),
                 'expires_at'         => $this->calculateExpiration( $policy ),
                 'metadata'           => $options['metadata'] ?? null,
             ] );

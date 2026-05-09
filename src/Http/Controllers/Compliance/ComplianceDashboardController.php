@@ -301,13 +301,9 @@ class ComplianceDashboardController extends Controller
             'consentRecords as withdrawn_count' => fn ( $q ) => $q->where( 'status', 'withdrawn' ),
         ] )->get();
 
-        // ConsentManager::grant() persists the grant time via the model
-        // timestamps (created_at), not granted_at — bucket the trend by
-        // created_at so this reports actual grant counts rather than
-        // silently undercounting / breaking on the missing column.
-        $consentTrend = ConsentRecord::selectRaw( 'DATE(created_at) as date, COUNT(*) as count' )
+        $consentTrend = ConsentRecord::selectRaw( 'DATE(granted_at) as date, COUNT(*) as count' )
             ->where( 'status', 'granted' )
-            ->where( 'created_at', '>=', now()->subDays( 30 ) )
+            ->where( 'granted_at', '>=', now()->subDays( 30 ) )
             ->groupBy( 'date' )
             ->orderBy( 'date' )
             ->get();

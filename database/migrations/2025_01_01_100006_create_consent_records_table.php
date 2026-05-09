@@ -25,6 +25,7 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->string('proof_reference')->nullable();
             $table->json('granular_choices')->nullable();
+            $table->timestamp('granted_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->timestamp('withdrawn_at')->nullable();
             $table->text('withdrawal_reason')->nullable();

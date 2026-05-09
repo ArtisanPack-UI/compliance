@@ -4,12 +4,13 @@ declare( strict_types=1 );
 
 namespace ArtisanPackUI\Compliance\Compliance\Traits;
 
-use Exception;
+use ArtisanPackUI\Compliance\Compliance\Exceptions\DecryptionException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
+use Throwable;
 
 trait PrivacyByDesign
 {
@@ -246,26 +247,21 @@ trait PrivacyByDesign
             // Otherwise → treat as plaintext and encrypt.
             $value = $this->attributes[ $attribute ];
 
-            // Crypt::encryptString and looksLikeEncryptedPayload both
-            // require a string (declare(strict_types=1) is on for this
-            // trait). Coerce scalars to string. Non-scalar values
-            // (arrays, objects, resources) fail CLOSED with an explicit
-            // exception — silently skipping them would leave the
-            // attribute persisted in plaintext, which is the opposite
-            // of what a privacy package should do. Apps storing
-            // structured sensitive data should JSON-encode (or
-            // otherwise serialize) before assigning to the attribute.
+            // Crypt::encryptString round-trips strings only. Rather than
+            // coerce non-string values (which silently loses type — int 0
+            // becomes "0", bool false becomes ""), reject anything that
+            // isn't already a string. Apps storing structured or typed
+            // sensitive data should serialize to a string (e.g. JSON-encode)
+            // before assigning to the attribute, so the round-trip semantics
+            // are explicit and reversible on the read side.
             if ( ! is_string( $value ) ) {
-                if ( ! is_scalar( $value ) ) {
-                    throw new InvalidArgumentException( sprintf(
-                        'PrivacyByDesign: sensitive attribute "%s" on %s holds a non-scalar value (%s); '
-                            . 'serialize it to a string before save (e.g. JSON-encode) so it can be encrypted.',
-                        $attribute,
-                        static::class,
-                        get_debug_type( $value ),
-                    ) );
-                }
-                $value = (string) $value;
+                throw new InvalidArgumentException( sprintf(
+                    'PrivacyByDesign: sensitive attribute "%s" on %s must be a string before encryption; got %s. '
+                        . 'Serialize structured / non-string scalar values explicitly (e.g. JSON-encode) before assignment.',
+                    $attribute,
+                    static::class,
+                    get_debug_type( $value ),
+                ) );
             }
 
             if ( $this->looksLikeEncryptedPayload( $value ) ) {
@@ -329,15 +325,22 @@ trait PrivacyByDesign
             return null;
         }
 
+        // The value passes looksLikeEncryptedPayload(), so a decrypt
+        // failure here means real broken ciphertext — rotated app
+        // key, tampered payload, or legacy encryption. Fail closed
+        // with a typed exception rather than returning null, which
+        // would conflate this with the absent / plaintext cases above
+        // and let callers (export, pseudonymize, etc.) ship opaque
+        // ciphertext as if it were a real value.
         try {
             return Crypt::decryptString( $value );
-        } catch ( Exception $e ) {
-            Log::warning( "Failed to decrypt attribute {$attribute}", [
-                'model' => static::class,
-                'id'    => $this->getKey(),
-            ] );
-
-            return null;
+        } catch ( Throwable $e ) {
+            throw new DecryptionException(
+                attribute: $attribute,
+                modelClass: static::class,
+                modelKey: $this->getKey(),
+                previous: $e,
+            );
         }
     }
 

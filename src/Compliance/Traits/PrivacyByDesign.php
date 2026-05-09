@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use RuntimeException;
 
 trait PrivacyByDesign
@@ -247,12 +248,22 @@ trait PrivacyByDesign
 
             // Crypt::encryptString and looksLikeEncryptedPayload both
             // require a string (declare(strict_types=1) is on for this
-            // trait). Coerce scalars to string and skip values that
-            // can't be coerced (arrays, objects, resources) rather
-            // than throwing a TypeError mid-save.
+            // trait). Coerce scalars to string. Non-scalar values
+            // (arrays, objects, resources) fail CLOSED with an explicit
+            // exception — silently skipping them would leave the
+            // attribute persisted in plaintext, which is the opposite
+            // of what a privacy package should do. Apps storing
+            // structured sensitive data should JSON-encode (or
+            // otherwise serialize) before assigning to the attribute.
             if ( ! is_string( $value ) ) {
                 if ( ! is_scalar( $value ) ) {
-                    continue;
+                    throw new InvalidArgumentException( sprintf(
+                        'PrivacyByDesign: sensitive attribute "%s" on %s holds a non-scalar value (%s); '
+                            . 'serialize it to a string before save (e.g. JSON-encode) so it can be encrypted.',
+                        $attribute,
+                        static::class,
+                        get_debug_type( $value ),
+                    ) );
                 }
                 $value = (string) $value;
             }

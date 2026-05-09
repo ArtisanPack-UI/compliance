@@ -183,7 +183,7 @@ class ConsentController extends Controller
             'data'    => [
                 'history' => $history->through( fn ( $record ) => [
                     'id'           => $record->id,
-                    'policy_name'  => $record->policy->name,
+                    'policy_name'  => $record->policy?->name,
                     'status'       => $record->status,
                     'granted_at'   => $record->granted_at?->toIso8601String(),
                     'withdrawn_at' => $record->withdrawn_at?->toIso8601String(),

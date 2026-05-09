@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 trait PrivacyByDesign
 {
@@ -29,7 +30,13 @@ trait PrivacyByDesign
 
         foreach ( $this->getSensitiveDataAttributes() as $attribute ) {
             if ( isset( $data[ $attribute ] ) ) {
-                $data[ $attribute ] = hash( 'sha256', $data[ $attribute ] . $salt );
+                // Sensitive attributes are encrypted at rest, so toArray()
+                // gave us non-deterministic ciphertext. Hashing that would
+                // produce a different pseudonym each time the row is
+                // re-saved. Decrypt first so the same underlying value
+                // always maps to the same pseudonym.
+                $plain              = $this->decryptSensitiveAttribute( $attribute ) ?? $data[ $attribute ];
+                $data[ $attribute ] = hash( 'sha256', $plain . $salt );
             }
         }
 
@@ -204,18 +211,61 @@ trait PrivacyByDesign
     protected function encryptSensitiveData(): void
     {
         foreach ( $this->getSensitiveDataAttributes() as $attribute ) {
-            if ( isset( $this->attributes[ $attribute ] ) && ! empty( $this->attributes[ $attribute ] ) ) {
-                // Check if the value is already encrypted by attempting to decrypt it
+            if ( ! isset( $this->attributes[ $attribute ] ) || empty( $this->attributes[ $attribute ] ) ) {
+                continue;
+            }
+
+            // Only encrypt values that look confidently like plaintext.
+            // The previous "decrypt-or-encrypt" approach silently
+            // re-encrypted legacy/malformed ciphertext (or values
+            // encrypted under a rotated app key), corrupting the field.
+            // Now: if the stored value parses as a Laravel encrypted
+            // payload AND decrypts cleanly → leave alone. If it parses
+            // as an encrypted payload but fails to decrypt → bail
+            // loudly rather than re-encrypting opaque ciphertext.
+            // Otherwise → treat as plaintext and encrypt.
+            $value = $this->attributes[ $attribute ];
+
+            if ( $this->looksLikeEncryptedPayload( $value ) ) {
                 try {
-                    Crypt::decryptString( $this->attributes[ $attribute ] );
-                    // If decryption succeeds, the value is already encrypted - skip
+                    Crypt::decryptString( $value );
+                    // Already encrypted with the current key — leave it.
                     continue;
                 } catch ( \Illuminate\Contracts\Encryption\DecryptException $e ) {
-                    // Decryption failed, meaning the value is not encrypted yet - proceed to encrypt
-                    $this->attributes[ $attribute ] = Crypt::encryptString( $this->attributes[ $attribute ] );
+                    throw new RuntimeException(
+                        "PrivacyByDesign: refusing to re-encrypt unreadable ciphertext for attribute '{$attribute}' "
+                            . '(legacy payload or rotated app key). Re-encrypt manually after migrating the data.',
+                        0,
+                        $e,
+                    );
                 }
             }
+
+            $this->attributes[ $attribute ] = Crypt::encryptString( $value );
         }
+    }
+
+    /**
+     * Heuristic: does a string look like a Laravel encrypted payload?
+     *
+     * Laravel's Crypt::encryptString returns a base64-encoded JSON
+     * blob with `iv`, `value`, and `mac` keys — recognising that
+     * shape lets us distinguish "real ciphertext that won't decrypt"
+     * from "user-supplied plaintext that happens to contain symbols".
+     */
+    protected function looksLikeEncryptedPayload( string $value ): bool
+    {
+        $decoded = base64_decode( $value, true );
+        if ( false === $decoded ) {
+            return false;
+        }
+
+        $json = json_decode( $decoded, true );
+
+        return is_array( $json )
+            && array_key_exists( 'iv', $json )
+            && array_key_exists( 'value', $json )
+            && array_key_exists( 'mac', $json );
     }
 
     /**

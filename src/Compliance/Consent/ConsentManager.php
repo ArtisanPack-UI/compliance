@@ -43,6 +43,18 @@ class ConsentManager
                     'withdrawn_at'      => now(),
                     'withdrawal_reason' => 'Superseded by new consent',
                 ] );
+
+                // Record the implicit withdrawal in the audit log too —
+                // getHistory() reads from ConsentAuditLog, so without this
+                // the superseded consent's withdrawal disappears from the
+                // compliance trail.
+                $this->logConsentChange(
+                    $existing,
+                    'withdrawn',
+                    'granted',
+                    'withdrawn',
+                    'Superseded by new consent',
+                );
             }
 
             // Create new consent record

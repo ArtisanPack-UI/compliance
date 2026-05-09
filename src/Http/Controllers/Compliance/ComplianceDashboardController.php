@@ -134,7 +134,7 @@ class ComplianceDashboardController extends Controller
         }
 
         $violations = $query->orderBy( 'created_at', 'desc' )
-            ->paginate( $request->input( 'per_page', 20 ) );
+            ->paginate( max( 1, min( (int) $request->input( 'per_page', 20 ), 100 ) ) );
 
         return response()->json( [
             'success' => true,
@@ -301,9 +301,13 @@ class ComplianceDashboardController extends Controller
             'consentRecords as withdrawn_count' => fn ( $q ) => $q->where( 'status', 'withdrawn' ),
         ] )->get();
 
-        $consentTrend = ConsentRecord::selectRaw( 'DATE(granted_at) as date, COUNT(*) as count' )
+        // ConsentManager::grant() persists the grant time via the model
+        // timestamps (created_at), not granted_at — bucket the trend by
+        // created_at so this reports actual grant counts rather than
+        // silently undercounting / breaking on the missing column.
+        $consentTrend = ConsentRecord::selectRaw( 'DATE(created_at) as date, COUNT(*) as count' )
             ->where( 'status', 'granted' )
-            ->where( 'granted_at', '>=', now()->subDays( 30 ) )
+            ->where( 'created_at', '>=', now()->subDays( 30 ) )
             ->groupBy( 'date' )
             ->orderBy( 'date' )
             ->get();
@@ -335,7 +339,7 @@ class ComplianceDashboardController extends Controller
     {
         $assessments = DataProtectionAssessment::with( 'processingActivity' )
             ->orderBy( 'created_at', 'desc' )
-            ->paginate( $request->input( 'per_page', 20 ) );
+            ->paginate( max( 1, min( (int) $request->input( 'per_page', 20 ), 100 ) ) );
 
         return response()->json( [
             'success' => true,
@@ -367,7 +371,7 @@ class ComplianceDashboardController extends Controller
     public function reports( Request $request ): JsonResponse
     {
         $reports = ScheduledComplianceReport::orderBy( 'created_at', 'desc' )
-            ->paginate( $request->input( 'per_page', 20 ) );
+            ->paginate( max( 1, min( (int) $request->input( 'per_page', 20 ), 100 ) ) );
 
         return response()->json( [
             'success' => true,

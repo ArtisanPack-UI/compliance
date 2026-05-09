@@ -6,17 +6,22 @@ namespace ArtisanPackUI\Compliance\Compliance\Traits;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 trait Auditable
 {
     /**
      * Get the audit trail for this record.
+     *
+     * The trait's default audit storage is the configured Laravel log
+     * channel (see {@see logAuditEvent}); apps that need a queryable
+     * audit trail should override this method *and* {@see storeAuditRecord}
+     * together to read from / write to their own audit-record table.
+     * Returns an empty collection by default.
      */
     public function getAuditTrail(): Collection
     {
-        // This would typically query an audit log table
-        // Returning empty collection as a placeholder
         return collect();
     }
 
@@ -63,7 +68,20 @@ trait Auditable
      */
     protected function getAuditExcludedAttributes(): array
     {
-        return $this->auditExcluded ?? ['password', 'remember_token'];
+        $excluded = $this->auditExcluded ?? ['password', 'remember_token'];
+
+        // When the model also uses PrivacyByDesign, fold its
+        // personal/sensitive attribute lists in automatically so PII
+        // can't leak into the audit channel by default.
+        if ( method_exists( $this, 'getPersonalDataAttributes' ) ) {
+            $excluded = array_merge( $excluded, $this->getPersonalDataAttributes() );
+        }
+
+        if ( method_exists( $this, 'getSensitiveDataAttributes' ) ) {
+            $excluded = array_merge( $excluded, $this->getSensitiveDataAttributes() );
+        }
+
+        return array_values( array_unique( $excluded ) );
     }
 
     /**
@@ -99,12 +117,20 @@ trait Auditable
             $data['original'] = array_intersect_key( $original, $changes );
         }
 
-        Log::channel( $this->getAuditLogChannel() )->info( "Model {$event}", $data );
+        // Defer the audit write until the surrounding DB transaction
+        // commits so a rolled-back save() doesn't leave a phantom audit
+        // entry claiming the change happened. DB::afterCommit runs
+        // immediately if there's no active transaction.
+        $channel  = $this->getAuditLogChannel();
+        $logTrail = (bool) config( 'artisanpack.compliance.privacy_by_design.audit_trail_enabled', true );
 
-        // Store in database if configured
-        if ( config( 'artisanpack.compliance.privacy_by_design.audit_trail_enabled', true ) ) {
-            $this->storeAuditRecord( $data );
-        }
+        DB::afterCommit( function () use ( $channel, $event, $data, $logTrail ): void {
+            Log::channel( $channel )->info( "Model {$event}", $data );
+
+            if ( $logTrail ) {
+                $this->storeAuditRecord( $data );
+            }
+        } );
     }
 
     /**

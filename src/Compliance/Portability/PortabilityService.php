@@ -11,6 +11,7 @@ use ArtisanPackUI\Compliance\Models\PortabilityRequest;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -66,10 +67,14 @@ class PortabilityService
             'destination_url' => $options['destination_url'] ?? null,
             'download_limit'  => config( 'artisanpack.compliance.portability.max_download_attempts', 5 ),
             'deadline_at'     => $deadlineAt,
-            'created_by'      => auth()->id(),
+            // Allow callers (jobs, console commands) to pass their own
+            // actor — auth()->id() is null in unauthenticated contexts.
+            'created_by'      => $options['created_by'] ?? auth()->id(),
         ] );
 
-        event( new DataExportRequested( $request ) );
+        // Defer dispatch until commit so listeners don't run for a record
+        // that gets rolled back. Matches ConsentManager's pattern.
+        DB::afterCommit( fn () => event( new DataExportRequested( $request ) ) );
 
         return $request;
     }
@@ -107,7 +112,7 @@ class PortabilityService
                 'expires_at'   => now()->addHours( $expiryHours ),
             ] );
 
-            event( new DataExportCompleted( $request ) );
+            DB::afterCommit( fn () => event( new DataExportCompleted( $request ) ) );
 
             // Handle direct transfer if requested
             if ( 'direct_transfer' === $request->transfer_type && $request->destination_url ) {

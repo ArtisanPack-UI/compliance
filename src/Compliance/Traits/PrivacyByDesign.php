@@ -122,7 +122,7 @@ trait PrivacyByDesign
     public function hasPersonalData(): bool
     {
         foreach ( $this->getPersonalDataAttributes() as $attribute ) {
-            if ( ! empty( $this->attributes[ $attribute ] ) ) {
+            if ( $this->attributeIsPresent( $attribute ) ) {
                 return true;
             }
         }
@@ -136,7 +136,7 @@ trait PrivacyByDesign
     public function hasSensitiveData(): bool
     {
         foreach ( $this->getSensitiveDataAttributes() as $attribute ) {
-            if ( ! empty( $this->attributes[ $attribute ] ) ) {
+            if ( $this->attributeIsPresent( $attribute ) ) {
                 return true;
             }
         }
@@ -160,6 +160,25 @@ trait PrivacyByDesign
                 $this->attributes[ $attribute ] = '[REDACTED]';
             }
         }
+    }
+
+    /**
+     * Whether the given attribute holds an actual value.
+     *
+     * Plain `! empty(...)` treats `'0'`, `0`, and `false` as missing —
+     * which is wrong for personal/sensitive data where those are
+     * legitimate values (a "0" survey answer, a `false` consent flag,
+     * etc.). Use explicit null + empty-string checks instead.
+     */
+    protected function attributeIsPresent( string $attribute ): bool
+    {
+        if ( ! array_key_exists( $attribute, $this->attributes ) ) {
+            return false;
+        }
+
+        $value = $this->attributes[ $attribute ];
+
+        return null !== $value && '' !== $value;
     }
 
     /**
@@ -211,7 +230,7 @@ trait PrivacyByDesign
     protected function encryptSensitiveData(): void
     {
         foreach ( $this->getSensitiveDataAttributes() as $attribute ) {
-            if ( ! isset( $this->attributes[ $attribute ] ) || empty( $this->attributes[ $attribute ] ) ) {
+            if ( ! $this->attributeIsPresent( $attribute ) ) {
                 continue;
             }
 
@@ -273,7 +292,7 @@ trait PrivacyByDesign
      */
     protected function decryptSensitiveAttribute( string $attribute ): ?string
     {
-        if ( ! isset( $this->attributes[ $attribute ] ) || empty( $this->attributes[ $attribute ] ) ) {
+        if ( ! $this->attributeIsPresent( $attribute ) ) {
             return null;
         }
 

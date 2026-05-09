@@ -65,7 +65,7 @@ class ConsentController extends Controller
                 'description' => $policy->description,
                 'version'     => $policy->version,
                 'is_required' => $policy->is_required,
-                'purposes'    => $policy->purposes,
+                'purpose'     => $policy->purpose,
             ] );
 
         return response()->json( [
@@ -85,17 +85,17 @@ class ConsentController extends Controller
             'success' => true,
             'data'    => [
                 'policy' => [
-                    'id'               => $policy->id,
-                    'name'             => $policy->name,
-                    'slug'             => $policy->slug,
-                    'description'      => $policy->description,
-                    'content'          => $policy->content,
-                    'version'          => $policy->version,
-                    'is_required'      => $policy->is_required,
-                    'purposes'         => $policy->purposes,
-                    'data_categories'  => $policy->data_categories,
-                    'retention_period' => $policy->retention_period,
-                    'third_parties'    => $policy->third_parties,
+                    'id'                  => $policy->id,
+                    'name'                => $policy->name,
+                    'slug'                => $policy->slug,
+                    'description'         => $policy->description,
+                    'legal_text'          => $policy->legal_text,
+                    'version'             => $policy->version,
+                    'is_required'         => $policy->is_required,
+                    'purpose'             => $policy->purpose,
+                    'data_categories'     => $policy->data_categories,
+                    'retention_period'    => $policy->retention_period,
+                    'third_party_sharing' => $policy->third_party_sharing,
                 ],
             ],
         ] );

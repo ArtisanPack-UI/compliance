@@ -23,13 +23,21 @@ class ConsentManager
      */
     public function grant( int $userId, string $purpose, array $options = [] ): ConsentRecord
     {
-        $policy = ConsentPolicy::getLatestForPurpose( $purpose );
+        return DB::transaction( function () use ( $userId, $purpose, $options ) {
+            // Read + lock the active policy inside the transaction so a
+            // concurrent updatePolicyVersion() can't flip the active row
+            // between the lookup and the insert. Otherwise we could
+            // record a brand-new consent against an already-superseded
+            // policy version.
+            $policy = ConsentPolicy::where( 'purpose', $purpose )
+                ->where( 'is_active', true )
+                ->lockForUpdate()
+                ->first();
 
-        if ( ! $policy ) {
-            throw new InvalidArgumentException( "No active consent policy found for purpose: {$purpose}" );
-        }
+            if ( ! $policy ) {
+                throw new InvalidArgumentException( "No active consent policy found for purpose: {$purpose}" );
+            }
 
-        return DB::transaction( function () use ( $userId, $purpose, $policy, $options ) {
             // Check for existing consent and withdraw it (use pessimistic locking to prevent race conditions)
             $existing = ConsentRecord::where( 'user_id', $userId )
                 ->where( 'purpose', $purpose )

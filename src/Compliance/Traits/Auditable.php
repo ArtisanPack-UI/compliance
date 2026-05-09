@@ -6,7 +6,6 @@ namespace ArtisanPackUI\Compliance\Compliance\Traits;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 trait Auditable
@@ -119,12 +118,14 @@ trait Auditable
 
         // Defer the audit write until the surrounding DB transaction
         // commits so a rolled-back save() doesn't leave a phantom audit
-        // entry claiming the change happened. DB::afterCommit runs
-        // immediately if there's no active transaction.
+        // entry. Use the model's own connection (not the DB facade /
+        // default connection) so multi-database apps tie the callback
+        // to the right transaction. afterCommit runs immediately if
+        // there's no active transaction on that connection.
         $channel  = $this->getAuditLogChannel();
         $logTrail = (bool) config( 'artisanpack.compliance.privacy_by_design.audit_trail_enabled', true );
 
-        DB::afterCommit( function () use ( $channel, $event, $data, $logTrail ): void {
+        $this->getConnection()->afterCommit( function () use ( $channel, $event, $data, $logTrail ): void {
             Log::channel( $channel )->info( "Model {$event}", $data );
 
             if ( $logTrail ) {

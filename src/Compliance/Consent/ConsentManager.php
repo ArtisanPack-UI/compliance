@@ -13,6 +13,7 @@ use DateTime;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use LogicException;
 
 class ConsentManager
 {
@@ -273,18 +274,26 @@ class ConsentManager
 
     /**
      * Send reconsent notifications.
+     *
+     * Override this method (or replace the trait via a custom
+     * ConsentManager subclass / container binding) to wire in your
+     * app's notification channel — the package ships without one
+     * because reconsent UX is highly app-specific.
+     *
+     * @throws LogicException Always — calling the unimplemented base
+     *   method would otherwise return a sent-count for notifications
+     *   that never actually left the system.
      */
     public function notifyReconsent( string $purpose ): int
     {
-        $records = $this->getUsersRequiringReconsent( $purpose );
-        $count   = 0;
-
-        foreach ( $records as $record ) {
-            // TODO: Send notification to user
-            $count++;
-        }
-
-        return $count;
+        throw new LogicException(
+            sprintf(
+                'ConsentManager::notifyReconsent() is unimplemented in the base package. '
+                    . 'Override it (or bind a subclass) to dispatch a notification per record from '
+                    . 'getUsersRequiringReconsent(\'%s\').',
+                $purpose,
+            ),
+        );
     }
 
     /**

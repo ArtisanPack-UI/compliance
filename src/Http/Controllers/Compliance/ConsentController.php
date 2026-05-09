@@ -12,6 +12,7 @@ use ArtisanPackUI\Compliance\Models\ConsentRecord;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use InvalidArgumentException;
 
 class ConsentController extends Controller
 {
@@ -111,13 +112,23 @@ class ConsentController extends Controller
             'metadata' => 'nullable|array',
         ] );
 
-        $record = $this->consentManager->grant(
-            $request->user()->id,
-            $validated['purpose'],
-            [
-                'metadata' => $validated['metadata'] ?? null,
-            ],
-        );
+        try {
+            $record = $this->consentManager->grant(
+                $request->user()->id,
+                $validated['purpose'],
+                [
+                    'metadata' => $validated['metadata'] ?? null,
+                ],
+            );
+        } catch ( InvalidArgumentException $e ) {
+            // Unknown / inactive purpose is client input, not a server
+            // fault — surface as a 422 so callers get a usable error
+            // payload instead of an opaque 500.
+            return response()->json( [
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422 );
+        }
 
         return response()->json( [
             'success' => true,

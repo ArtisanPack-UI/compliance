@@ -153,13 +153,21 @@ class DataMinimizationValidator
      */
     protected function validateFormat( mixed $value, string $format ): bool
     {
+        // Reject non-scalar input up-front. The string-dependent checks
+        // below (strtotime / ctype_*) emit warnings on arrays / objects
+        // rather than returning false, so a non-scalar would slip past
+        // as "valid" without this guard.
+        if ( is_array( $value ) || is_object( $value ) ) {
+            return false;
+        }
+
         return match ( $format ) {
             'email'        => false !== filter_var( $value, FILTER_VALIDATE_EMAIL ),
-            'phone'        => is_string( $value ) && preg_match( '/^[\d\s\-\+\(\)]+$/', $value ),
-            'date'         => false !== strtotime( $value ),
+            'phone'        => is_string( $value ) && (bool) preg_match( '/^[\d\s\-\+\(\)]+$/', $value ),
+            'date'         => is_string( $value ) && false !== strtotime( $value ),
             'numeric'      => is_numeric( $value ),
-            'alpha'        => ctype_alpha( $value ),
-            'alphanumeric' => ctype_alnum( $value ),
+            'alpha'        => is_string( $value ) && ctype_alpha( $value ),
+            'alphanumeric' => is_string( $value ) && ctype_alnum( $value ),
             default        => true,
         };
     }

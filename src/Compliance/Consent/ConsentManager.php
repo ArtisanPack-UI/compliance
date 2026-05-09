@@ -79,9 +79,14 @@ class ConsentManager
     public function withdraw( int $userId, string $purpose, ?string $reason = null ): bool
     {
         return DB::transaction( function () use ( $userId, $purpose, $reason ) {
+            // Pessimistic lock to mirror grant()'s locking. Without this
+            // a concurrent grant() could land between our SELECT and the
+            // UPDATE, leaving the new grant in place while we mark the
+            // stale row as withdrawn.
             $record = ConsentRecord::where( 'user_id', $userId )
                 ->where( 'purpose', $purpose )
                 ->where( 'status', 'granted' )
+                ->lockForUpdate()
                 ->first();
 
             if ( ! $record ) {

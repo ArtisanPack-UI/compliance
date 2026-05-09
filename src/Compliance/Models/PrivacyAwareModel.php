@@ -48,7 +48,9 @@ abstract class PrivacyAwareModel extends Model
             return false;
         }
 
-        return $this->created_at->addDays( static::$retentionDays )->isPast();
+        // copy() before arithmetic so we don't mutate the model's
+        // created_at attribute and accidentally dirty it for save().
+        return $this->created_at->copy()->addDays( static::$retentionDays )->isPast();
     }
 
     /**
@@ -60,7 +62,7 @@ abstract class PrivacyAwareModel extends Model
             return null;
         }
 
-        $expiresAt = $this->created_at->addDays( static::$retentionDays );
+        $expiresAt = $this->created_at->copy()->addDays( static::$retentionDays );
 
         if ( $expiresAt->isPast() ) {
             return CarbonInterval::days( 0 );

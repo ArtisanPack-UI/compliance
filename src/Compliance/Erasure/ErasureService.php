@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use JsonException;
+use RuntimeException;
 
 class ErasureService
 {
@@ -71,7 +72,23 @@ class ErasureService
     public function processRequest( ErasureRequest $request ): ErasureRequest
     {
         return DB::transaction( function () use ( $request ) {
-            $request->update( ['status' => 'processing'] );
+            // Atomic claim: only an approved + identity-verified request
+            // that hasn't already entered processing should advance.
+            // The conditional UPDATE doubles as a lock — a second
+            // caller racing on the same row sees zero affected rows.
+            $updated = ErasureRequest::whereKey( $request->id )
+                ->where( 'status', 'approved' )
+                ->where( 'identity_verified', true )
+                ->update( ['status' => 'processing'] );
+
+            if ( 0 === $updated ) {
+                throw new RuntimeException(
+                    "Erasure request {$request->request_number} is not eligible for processing "
+                        . '(must be approved and identity-verified, and not already in progress).',
+                );
+            }
+
+            $request->refresh();
 
             $processedHandlers = [];
             $failedHandlers    = [];

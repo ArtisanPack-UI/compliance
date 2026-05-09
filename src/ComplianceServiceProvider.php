@@ -205,7 +205,7 @@ class ComplianceServiceProvider extends ServiceProvider
         } );
 
         Event::listen( ComplianceCheckCompleted::class, function ( $event ): void {
-            if ( ! $event->result->passed ) {
+            if ( $event->result->isFailed() ) {
                 Log::warning( 'Compliance check failed', [
                     'check'   => $event->result->checkName,
                     'message' => $event->result->message,

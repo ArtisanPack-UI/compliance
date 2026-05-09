@@ -242,7 +242,7 @@ class ConsentController extends Controller
     public function cookiePreferences( Request $request ): JsonResponse
     {
         $categories         = $this->cookieHandler->getCategories();
-        $currentPreferences = $this->cookieHandler->getCurrentPreferences( $request );
+        $currentPreferences = $this->cookieHandler->getConsentStatus( $request );
 
         return response()->json( [
             'success' => true,
@@ -263,11 +263,15 @@ class ConsentController extends Controller
             'preferences.*' => 'boolean',
         ] );
 
-        $this->cookieHandler->savePreferences( $request, $validated['preferences'] );
+        // setConsent() returns a Symfony Cookie that has to be queued
+        // on the response — withCookie() does that. Without it, the
+        // browser never receives the updated consent state and the
+        // "saved" message would be a lie.
+        $cookie = $this->cookieHandler->setConsent( $validated['preferences'] );
 
         return response()->json( [
             'success' => true,
             'message' => 'Cookie preferences saved successfully.',
-        ]);
+        ] )->withCookie( $cookie );
     }
 }

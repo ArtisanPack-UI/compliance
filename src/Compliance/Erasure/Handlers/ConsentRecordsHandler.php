@@ -63,24 +63,27 @@ class ConsentRecordsHandler extends BaseErasureHandler
         $this->logErasure( 'starting', ['user_id' => $userId] );
 
         try {
-            $consentCount = ConsentRecord::where( 'user_id', $userId )->count();
-            $auditCount   = ConsentAuditLog::where( 'user_id', $userId )->count();
+            // Wrap both deletes in a single transaction so a failure
+            // halfway through can't leave consents deleted but audit
+            // logs intact (or vice versa) with mismatched reported
+            // counts.
+            return \Illuminate\Support\Facades\DB::transaction( function () use ( $userId ) {
+                $consentCount = ConsentRecord::where( 'user_id', $userId )->count();
+                $auditCount   = ConsentAuditLog::where( 'user_id', $userId )->count();
 
-            $totalFound = $consentCount + $auditCount;
+                $totalFound = $consentCount + $auditCount;
 
-            // Delete consent records
-            ConsentRecord::where( 'user_id', $userId )->delete();
+                ConsentRecord::where( 'user_id', $userId )->delete();
+                ConsentAuditLog::where( 'user_id', $userId )->delete();
 
-            // Delete audit logs
-            ConsentAuditLog::where( 'user_id', $userId )->delete();
+                $this->logErasure( 'completed', [
+                    'user_id'         => $userId,
+                    'consent_records' => $consentCount,
+                    'audit_logs'      => $auditCount,
+                ] );
 
-            $this->logErasure( 'completed', [
-                'user_id'         => $userId,
-                'consent_records' => $consentCount,
-                'audit_logs'      => $auditCount,
-            ] );
-
-            return $this->success( $totalFound, $totalFound );
+                return $this->success( $totalFound, $totalFound );
+            } );
         } catch ( Exception $e ) {
             $this->logErasure( 'failed', ['user_id' => $userId, 'error' => $e->getMessage()] );
 

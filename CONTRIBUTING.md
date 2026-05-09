@@ -17,7 +17,7 @@ As an open-source project, the `artisanpack-ui/compliance` package is open to co
 
 ## Code of Conduct
 
-In order to make this a best place for everyone to contribute, there are some hard and fast rules that everyone needs to abide by.
+To make this the best place for everyone to contribute, there are some hard and fast rules that everyone needs to abide by.
 
 * This package is open to everyone no matter your race, ethnicity, gender, who you love, etc. To keep it that way, there's zero tolerance for any racist, misogynistic, xenophobic, bigoted, Zionist, antisemitic (yes, there is a difference), Islamophobic, etc. messages. This includes messages sent to a fellow contributor outside this repository. In short, don't be a jerk. Failure to comply will result in a ban from the project.
 * Be respectful when communicating with fellow contributors.
@@ -221,7 +221,7 @@ This template is for release pull requests and should only be used by maintainer
 
 ### Code Review Process
 
-When you submit an PR:
+When you submit a PR:
 1. A maintainer will review within 1-3 days
 2. They may request changes or ask questions
 3. Address feedback by pushing new commits

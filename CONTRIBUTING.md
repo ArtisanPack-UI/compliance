@@ -22,14 +22,14 @@ In order to make this a best place for everyone to contribute, there are some ha
 * This package is open to everyone no matter your race, ethnicity, gender, who you love, etc. To keep it that way, there's zero tolerance for any racist, misogynistic, xenophobic, bigoted, Zionist, antisemitic (yes, there is a difference), Islamophobic, etc. messages. This includes messages sent to a fellow contributor outside this repository. In short, don't be a jerk. Failure to comply will result in a ban from the project.
 * Be respectful when communicating with fellow contributors.
 * Respect the decisions made about what belongs in the package.
-* Work together to make `compliance` the best compliance toolkit it can be — event logging, anomaly detection, threat intelligence, SIEM, incident response, alerting, and dashboards.
+* Work together to make `compliance` the best compliance toolkit it can be — consent workflows, DSR handling (erasure + portability), DPIA support, data minimization, retention automation, compliance monitoring, and reporting.
 
 ## Ways to Contribute
 
 There are a lot of ways to contribute to `compliance` even if you're not a developer. Here are some (but not all) of them:
 
-* Write code for the package — event loggers, anomaly detectors, threat-intel providers, SIEM exporters, alert channels, incident-response actions
-* Add or improve tests, including detector fixtures and event-stream replays
+* Write code for the package — consent services, DSR processors, DPIA helpers, retention-policy engines, anonymization / pseudonymization, compliance check implementations, and reporting adapters
+* Add or improve tests, including consent / DSR fixtures and retention-policy scenarios
 * Test the package against your own Laravel app and report bugs
 * Write documentation, examples, and recipes
 * Talk about `compliance` on your blog or social media

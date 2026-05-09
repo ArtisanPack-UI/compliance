@@ -102,8 +102,17 @@ jobs:
           echo "Extracting notes for version $VERSION"
 
           if [ -f "CHANGELOG.md" ]; then
-            # Extract section for this version
-            NOTES=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
+            # Extract section for this version. Use awk so the last
+            # version in CHANGELOG.md doesn't lose its final line —
+            # `sed '1d;$d'` would always strip the closing line of the
+            # captured range, which is correct when there's a trailing
+            # `## [next]` header but wrong when this version is the
+            # tail of the file.
+            NOTES=$(awk -v version="$VERSION" '
+              $0 ~ "^## \\[" version "\\]" { in_section = 1; next }
+              in_section && /^## \[/ { exit }
+              in_section { print }
+            ' CHANGELOG.md | sed '/^[[:space:]]*$/d')
             if [ -z "$NOTES" ]; then
               NOTES="Release $VERSION. See CHANGELOG.md for details."
             fi

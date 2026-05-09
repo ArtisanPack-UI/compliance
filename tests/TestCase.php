@@ -12,7 +12,7 @@ use Orchestra\Testbench\TestCase as BaseTestCase;
  *
  * Provides base functionality for all package tests.
  *
- * @since   1.0.0
+ * @since   0.1.0
  */
 abstract class TestCase extends BaseTestCase
 {
@@ -27,7 +27,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Gets package providers.
      *
-     * @since 1.0.0
+     * @since 0.1.0
      *
      * @param  \Illuminate\Foundation\Application  $app  The application instance.
      *
@@ -43,7 +43,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Defines environment setup.
      *
-     * @since 1.0.0
+     * @since 0.1.0
      *
      * @param  \Illuminate\Foundation\Application  $app  The application instance.
      */

@@ -105,7 +105,7 @@ class ErasureController extends Controller
         }
 
         // Calculate scheduled date based on grace period
-        $gracePeriodDays = config( 'artisanpack.compliance.compliance.erasure.grace_period_days', 30 );
+        $gracePeriodDays = config( 'artisanpack.compliance.erasure.grace_period_days', 30 );
         $scheduledAt     = now()->addDays( $gracePeriodDays );
 
         // Create erasure request

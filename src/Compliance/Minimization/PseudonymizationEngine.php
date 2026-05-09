@@ -204,7 +204,7 @@ class PseudonymizationEngine
 	 */
 	protected function generatePseudonym( string $value, string $salt ): string
 	{
-		$algorithm = config( 'artisanpack.compliance.compliance.minimization.anonymization_algorithm', 'sha256' );
+		$algorithm = config( 'artisanpack.compliance.minimization.anonymization_algorithm', 'sha256' );
 
 		return match ( $algorithm ) {
 			'sha256' => hash_hmac( 'sha256', $value, $salt ),
@@ -238,7 +238,7 @@ class PseudonymizationEngine
 	{
 		$trackedKeys = Cache::get( self::MAPPING_INDEX_KEY, [] );
 		$trackedKeys = is_array( $trackedKeys ) ? $trackedKeys : [];
-		$ttl         = config( 'artisanpack.compliance.compliance.minimization.mapping_ttl' );
+		$ttl         = config( 'artisanpack.compliance.minimization.mapping_ttl' );
 
 		if ( ! in_array( $cacheKey, $trackedKeys ) ) {
 			$trackedKeys[] = $cacheKey;

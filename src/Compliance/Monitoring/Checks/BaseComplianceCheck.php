@@ -72,7 +72,7 @@ abstract class BaseComplianceCheck implements ComplianceCheckInterface
     {
         $this->validateName();
 
-        $configKey = 'artisanpack.compliance.compliance.monitoring.checks.' . $this->name . '.enabled';
+        $configKey = 'artisanpack.compliance.monitoring.checks.' . $this->name . '.enabled';
 
         return config( $configKey, $this->enabled );
     }
@@ -95,7 +95,7 @@ abstract class BaseComplianceCheck implements ComplianceCheckInterface
         $this->validateName();
 
         return config(
-            'artisanpack.compliance.compliance.monitoring.checks.' . $this->name . '.severity',
+            'artisanpack.compliance.monitoring.checks.' . $this->name . '.severity',
             $this->severity,
         );
     }

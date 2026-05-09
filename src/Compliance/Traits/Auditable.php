@@ -102,7 +102,7 @@ trait Auditable
         Log::channel( $this->getAuditLogChannel() )->info( "Model {$event}", $data );
 
         // Store in database if configured
-        if ( config( 'artisanpack.compliance.compliance.privacy_by_design.audit_trail_enabled', true ) ) {
+        if ( config( 'artisanpack.compliance.privacy_by_design.audit_trail_enabled', true ) ) {
             $this->storeAuditRecord( $data );
         }
     }

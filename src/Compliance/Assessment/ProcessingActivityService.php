@@ -177,7 +177,7 @@ class ProcessingActivityService
             'generated_at' => now()->toIso8601String(),
             'organization' => [
                 'name'        => config( 'app.name' ),
-                'dpo_contact' => config( 'artisanpack.compliance.compliance.dpia.dpo_contact' ),
+                'dpo_contact' => config( 'artisanpack.compliance.dpia.dpo_contact' ),
             ],
             'activities' => $activities->map( function ( ProcessingActivity $activity ) {
                 return [
@@ -297,7 +297,7 @@ class ProcessingActivityService
     protected function determineDpiaRequired( array $data ): bool
     {
         // Check for special categories - ensure config value is an array
-        $specialCategories = config( 'artisanpack.compliance.compliance.special_categories' );
+        $specialCategories = config( 'artisanpack.compliance.special_categories' );
         $specialCategories = is_array( $specialCategories ) ? $specialCategories : [];
         $dataCategories    = $data['data_categories'] ?? [];
         $dataCategories    = is_array( $dataCategories ) ? $dataCategories : [];

@@ -39,7 +39,12 @@ class ConsentRecordsHandler extends BaseErasureHandler
      */
     public function canHandle( int $userId ): bool
     {
-        return ConsentRecord::where( 'user_id', $userId )->exists();
+        // Cover users who only have audit-log entries (e.g. after an
+        // earlier withdraw + soft-delete cycle) — otherwise erase()
+        // would skip them and the audit logs would survive a "right
+        // to be forgotten" request.
+        return ConsentRecord::where( 'user_id', $userId )->exists()
+            || ConsentAuditLog::where( 'user_id', $userId )->exists();
     }
 
     /**

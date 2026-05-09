@@ -196,7 +196,7 @@ class DpiaService
     public function isRequired( ProcessingActivity $activity ): bool
     {
         // Check for special categories
-        $specialCategories = config( 'artisanpack.compliance.compliance.special_categories', [] );
+        $specialCategories = config( 'artisanpack.compliance.special_categories', [] );
         $dataCategories    = $activity->data_categories ?? [];
 
         foreach ( $dataCategories as $category ) {

@@ -298,7 +298,7 @@ trait PrivacyByDesign
      */
     protected function logDataAccess( string $accessor, string $purpose ): void
     {
-        if ( ! config( 'artisanpack.compliance.compliance.privacy_by_design.log_data_access', true ) ) {
+        if ( ! config( 'artisanpack.compliance.privacy_by_design.log_data_access', true ) ) {
             return;
         }
 

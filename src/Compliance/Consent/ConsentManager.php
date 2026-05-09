@@ -66,8 +66,12 @@ class ConsentManager
             // Log the consent grant
             $this->logConsentChange( $record, 'granted', null, 'granted' );
 
-            // Fire event
-            event( new ConsentGranted( $record ) );
+            // Defer event dispatch until the transaction commits — listeners
+            // doing external work (sending emails, calling out to a
+            // marketing tool, etc.) shouldn't observe uncommitted state
+            // and shouldn't fire if a later operation rolls the transaction
+            // back.
+            DB::afterCommit( fn () => event( new ConsentGranted( $record ) ) );
 
             return $record;
         } );
@@ -102,8 +106,8 @@ class ConsentManager
             // Log the withdrawal
             $this->logConsentChange( $record, 'withdrawn', 'granted', 'withdrawn', $reason );
 
-            // Fire event
-            event( new ConsentWithdrawn( $record ) );
+            // Defer event dispatch until commit (see grant() for rationale).
+            DB::afterCommit( fn () => event( new ConsentWithdrawn( $record ) ) );
 
             return true;
         } );
@@ -178,11 +182,20 @@ class ConsentManager
     public function updatePolicyVersion( string $purpose, string $version, array $changes ): ConsentPolicy
     {
         return DB::transaction( function () use ( $purpose, $version, $changes ) {
-            $currentPolicy = ConsentPolicy::getLatestForPurpose( $purpose );
+            // Lock the active policy row for this purpose so two concurrent
+            // updatePolicyVersion calls can't both insert a new active row
+            // (each thinking the other's read returned null or stale data).
+            $currentPolicy = ConsentPolicy::where( 'purpose', $purpose )
+                ->where( 'is_active', true )
+                ->lockForUpdate()
+                ->first();
 
-            // Validate required fields when creating the first policy
+            // Validate required fields when creating the first policy.
+            // The contract says BOTH `name` AND `legal_text` are required —
+            // an `&&` here was wrong (it accepts the policy when only one
+            // field is present).
             if ( null === $currentPolicy ) {
-                if ( empty( $changes['name'] ) && empty( $changes['legal_text'] ) ) {
+                if ( empty( $changes['name'] ) || empty( $changes['legal_text'] ) ) {
                     throw new InvalidArgumentException(
                         'When creating the first policy for a purpose, "name" and "legal_text" are required in the changes array.',
                     );
@@ -298,7 +311,7 @@ class ConsentManager
         // Check if policy has changed
         $currentPolicy = ConsentPolicy::getLatestForPurpose( $purpose );
         if ( $currentPolicy && $record->policy_version !== $currentPolicy->version ) {
-            if ( config( 'artisanpack.compliance.compliance.consent.reconsent_on_policy_change', true ) ) {
+            if ( config( 'artisanpack.compliance.consent.reconsent_on_policy_change', true ) ) {
                 return ConsentVerification::reconsentRequired( $record, 'Policy has been updated' );
             }
         }
@@ -357,7 +370,7 @@ class ConsentManager
         // expiration); fall back to the global default. A null on both
         // sides means consent never expires.
         $expiryDays = $policy->retention_period
-            ?? config( 'artisanpack.compliance.compliance.consent.default_expiry_days' );
+            ?? config( 'artisanpack.compliance.consent.default_expiry_days' );
 
         if ( null === $expiryDays ) {
             return null;

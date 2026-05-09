@@ -1,8 +1,7 @@
 <?php
 
 return [
-    'compliance' => [
-        'enabled' => env('COMPLIANCE_ENABLED', true),
+    'enabled' => env('COMPLIANCE_ENABLED', true),
 
         // Default regulation to enforce
         'default_regulation' => env('COMPLIANCE_REGULATION', 'gdpr'),
@@ -167,5 +166,4 @@ return [
             'public_interest' => 'Public Interest (Art. 6(1)(e))',
             'legitimate_interests' => 'Legitimate Interests (Art. 6(1)(f))',
         ],
-    ],
 ];

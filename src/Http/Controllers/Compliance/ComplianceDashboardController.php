@@ -458,7 +458,7 @@ class ComplianceDashboardController extends Controller
             ], 404 );
         }
 
-        $disk = config( 'artisanpack.compliance.compliance.reporting.storage_disk', 'local' );
+        $disk = config( 'artisanpack.compliance.reporting.storage_disk', 'local' );
 
         if ( ! Storage::disk( $disk )->exists( $report->last_file_path ) ) {
             return response()->json( [

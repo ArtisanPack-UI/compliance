@@ -177,7 +177,7 @@ class DataMinimizerService
             return 0;
         }
 
-        $batchSize = config( 'artisanpack.compliance.compliance.minimization.purge_batch_size', 1000 );
+        $batchSize = config( 'artisanpack.compliance.minimization.purge_batch_size', 1000 );
 
         $count = 0;
         do {

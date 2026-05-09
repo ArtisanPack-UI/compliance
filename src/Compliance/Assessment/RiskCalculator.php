@@ -64,7 +64,7 @@ class RiskCalculator
         }
 
         // Use highest risk or average based on methodology
-        $method = config( 'artisanpack.compliance.compliance.dpia.risk_calculation_method', 'highest' );
+        $method = config( 'artisanpack.compliance.dpia.risk_calculation_method', 'highest' );
 
         $score = match ( $method ) {
             'highest'  => $risks->max( 'inherent_score' ),
@@ -139,7 +139,7 @@ class RiskCalculator
      */
     public function suggestRiskLevel( string $riskCategory, array $dataCategories ): string
     {
-        $specialCategories = config( 'artisanpack.compliance.compliance.special_categories', [] );
+        $specialCategories = config( 'artisanpack.compliance.special_categories', [] );
 
         $hasSpecialCategory = ! empty( array_intersect( $dataCategories, $specialCategories ) );
 

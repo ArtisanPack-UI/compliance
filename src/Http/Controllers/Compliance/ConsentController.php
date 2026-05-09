@@ -107,19 +107,16 @@ class ConsentController extends Controller
     public function grant( Request $request ): JsonResponse
     {
         $validated = $request->validate( [
-            'policy_id' => 'required|exists:consent_policies,id',
-            'purposes'  => 'nullable|array',
-            'metadata'  => 'nullable|array',
+            'purpose'  => 'required|string',
+            'metadata' => 'nullable|array',
         ] );
 
-        $user   = $request->user();
-        $policy = ConsentPolicy::findOrFail( $validated['policy_id'] );
-
-        $record = $this->consentManager->grantConsent(
-            $user,
-            $policy,
-            $validated['purposes'] ?? null,
-            $validated['metadata'] ?? [],
+        $record = $this->consentManager->grant(
+            $request->user()->id,
+            $validated['purpose'],
+            [
+                'metadata' => $validated['metadata'] ?? null,
+            ],
         );
 
         return response()->json( [
@@ -128,9 +125,10 @@ class ConsentController extends Controller
             'data'    => [
                 'consent_record' => [
                     'id'         => $record->id,
-                    'policy_id'  => $record->consent_policy_id,
+                    'purpose'    => $record->purpose,
+                    'policy_id'  => $record->policy_id,
                     'status'     => $record->status,
-                    'granted_at' => $record->granted_at->toIso8601String(),
+                    'granted_at' => $record->granted_at?->toIso8601String(),
                 ],
             ],
         ] );
@@ -142,20 +140,17 @@ class ConsentController extends Controller
     public function withdraw( Request $request ): JsonResponse
     {
         $validated = $request->validate( [
-            'policy_id' => 'required|exists:consent_policies,id',
-            'reason'    => 'nullable|string|max:500',
+            'purpose' => 'required|string',
+            'reason'  => 'nullable|string|max:500',
         ] );
 
-        $user   = $request->user();
-        $policy = ConsentPolicy::findOrFail( $validated['policy_id'] );
-
-        $record = $this->consentManager->withdrawConsent(
-            $user,
-            $policy,
+        $withdrawn = $this->consentManager->withdraw(
+            $request->user()->id,
+            $validated['purpose'],
             $validated['reason'] ?? null,
         );
 
-        if ( ! $record ) {
+        if ( ! $withdrawn ) {
             return response()->json( [
                 'success' => false,
                 'message' => 'No active consent found to withdraw.',
@@ -165,14 +160,6 @@ class ConsentController extends Controller
         return response()->json( [
             'success' => true,
             'message' => 'Consent withdrawn successfully.',
-            'data'    => [
-                'consent_record' => [
-                    'id'           => $record->id,
-                    'policy_id'    => $record->consent_policy_id,
-                    'status'       => $record->status,
-                    'withdrawn_at' => $record->withdrawn_at->toIso8601String(),
-                ],
-            ],
         ] );
     }
 
@@ -218,11 +205,16 @@ class ConsentController extends Controller
     /**
      * Verify if the user has given consent to a policy.
      */
-    public function verify( Request $request, ConsentPolicy $policy ): JsonResponse
+    public function verify( Request $request ): JsonResponse
     {
-        $user = $request->user();
+        $validated = $request->validate( [
+            'purpose' => 'required|string',
+        ] );
 
-        $verification = $this->consentManager->verifyConsent( $user, $policy );
+        $verification = $this->consentManager->verifyConsent(
+            $request->user()->id,
+            $validated['purpose'],
+        );
 
         return response()->json( [
             'success' => true,

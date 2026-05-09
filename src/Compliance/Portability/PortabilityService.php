@@ -53,18 +53,18 @@ class PortabilityService
      */
     public function createRequest( int $userId, array $options = [] ): PortabilityRequest
     {
-        $defaultDeadlineDays = config( 'artisanpack.compliance.compliance.portability.default_deadline_days', 30 );
+        $defaultDeadlineDays = config( 'artisanpack.compliance.portability.default_deadline_days', 30 );
         $deadlineAt          = $options['deadline_at'] ?? Carbon::now()->addDays( $defaultDeadlineDays );
 
         $request = PortabilityRequest::create( [
             'user_id'         => $userId,
             'requester_type'  => $options['requester_type'] ?? 'self',
             'status'          => 'pending',
-            'format'          => $options['format'] ?? config( 'artisanpack.compliance.compliance.portability.default_format', 'json' ),
+            'format'          => $options['format'] ?? config( 'artisanpack.compliance.portability.default_format', 'json' ),
             'categories'      => $options['categories'] ?? null,
             'transfer_type'   => $options['transfer_type'] ?? 'download',
             'destination_url' => $options['destination_url'] ?? null,
-            'download_limit'  => config( 'artisanpack.compliance.compliance.portability.max_download_attempts', 5 ),
+            'download_limit'  => config( 'artisanpack.compliance.portability.max_download_attempts', 5 ),
             'deadline_at'     => $deadlineAt,
             'created_by'      => auth()->id(),
         ] );
@@ -96,7 +96,7 @@ class PortabilityService
             $path = $this->storeExport( $package, $request );
 
             // Calculate expiry
-            $expiryHours = config( 'artisanpack.compliance.compliance.portability.download_expiry_hours', 72 );
+            $expiryHours = config( 'artisanpack.compliance.portability.download_expiry_hours', 72 );
 
             $request->update( [
                 'status'       => 'completed',
@@ -239,7 +239,7 @@ class PortabilityService
      */
     public function getSupportedFormats(): array
     {
-        return config( 'artisanpack.compliance.compliance.portability.supported_formats', ['json', 'xml', 'csv'] );
+        return config( 'artisanpack.compliance.portability.supported_formats', ['json', 'xml', 'csv'] );
     }
 
     /**
@@ -247,7 +247,7 @@ class PortabilityService
      */
     public function cleanupExpired(): int
     {
-        $disk  = config( 'artisanpack.compliance.compliance.portability.storage_disk', 'local' );
+        $disk  = config( 'artisanpack.compliance.portability.storage_disk', 'local' );
         $count = 0;
 
         $expired = PortabilityRequest::expired()->get();
@@ -272,7 +272,7 @@ class PortabilityService
      */
     protected function storeExport( ExportPackage $package, PortabilityRequest $request ): string
     {
-        $disk     = config( 'artisanpack.compliance.compliance.portability.storage_disk', 'local' );
+        $disk     = config( 'artisanpack.compliance.portability.storage_disk', 'local' );
         $basePath = 'data-exports';
 
         $filename = sprintf(

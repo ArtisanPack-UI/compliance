@@ -129,7 +129,7 @@ class CookieConsentHandler
      */
     public function getCategories(): array
     {
-        return config( 'artisanpack.compliance.compliance.consent.cookie_consent.categories', [
+        return config( 'artisanpack.compliance.consent.cookie_consent.categories', [
             'essential',
             'functional',
             'analytics',
@@ -148,7 +148,7 @@ class CookieConsentHandler
             'name'            => self::CONSENT_COOKIE_NAME,
             'lifetime'        => self::CONSENT_COOKIE_LIFETIME,
             'categories'      => $this->getCategories(),
-            'banner_position' => config( 'artisanpack.compliance.compliance.consent.cookie_consent.banner_position', 'bottom' ),
+            'banner_position' => config( 'artisanpack.compliance.consent.cookie_consent.banner_position', 'bottom' ),
         ];
     }
 

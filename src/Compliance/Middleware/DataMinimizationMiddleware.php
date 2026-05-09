@@ -23,7 +23,7 @@ class DataMinimizationMiddleware
     public function handle( Request $request, Closure $next, string $purpose ): Response
     {
         // Validate collection if configured
-        if ( config( 'artisanpack.compliance.compliance.minimization.enforce_collection_policies', true ) ) {
+        if ( config( 'artisanpack.compliance.minimization.enforce_collection_policies', true ) ) {
             $validation = $this->minimizer->validateCollection(
                 $request->all(),
                 $purpose,

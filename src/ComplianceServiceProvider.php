@@ -145,11 +145,11 @@ class ComplianceServiceProvider extends ServiceProvider
     {
         $router = $this->app['router'];
 
-        if ( config( 'artisanpack.compliance.compliance.consent.enabled', true ) ) {
+        if ( config( 'artisanpack.compliance.consent.enabled', true ) ) {
             $router->aliasMiddleware( 'check.consent', CheckConsentMiddleware::class );
         }
 
-        if ( config( 'artisanpack.compliance.compliance.minimization.enabled', true ) ) {
+        if ( config( 'artisanpack.compliance.minimization.enabled', true ) ) {
             $router->aliasMiddleware( 'data.minimization', DataMinimizationMiddleware::class );
         }
     }

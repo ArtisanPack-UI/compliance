@@ -97,7 +97,7 @@ class PortabilityController extends Controller
             ->where( 'created_at', '>=', now()->subDays( 30 ) )
             ->count();
 
-        $maxExportsPerMonth = config( 'artisanpack.compliance.compliance.portability.max_exports_per_month', 5 );
+        $maxExportsPerMonth = config( 'artisanpack.compliance.portability.max_exports_per_month', 5 );
 
         if ( $recentExports >= $maxExportsPerMonth ) {
             return response()->json( [
@@ -114,7 +114,7 @@ class PortabilityController extends Controller
             'format'           => $validated['format'],
             'data_categories'  => $validated['data_categories'] ?? null,
             'include_metadata' => $validated['include_metadata'] ?? true,
-            'download_limit'   => config( 'artisanpack.compliance.compliance.portability.download_limit', 3 ),
+            'download_limit'   => config( 'artisanpack.compliance.portability.download_limit', 3 ),
             'download_count'   => 0,
             'ip_address'       => $request->ip(),
             'user_agent'       => $request->userAgent(),
@@ -219,7 +219,7 @@ class PortabilityController extends Controller
 
         // Check if file exists
         $filePath = $portabilityRequest->file_path;
-        $disk     = config( 'artisanpack.compliance.compliance.portability.storage_disk', 'local' );
+        $disk     = config( 'artisanpack.compliance.portability.storage_disk', 'local' );
 
         if ( ! Storage::disk( $disk )->exists( $filePath ) ) {
             return response()->json( [

@@ -67,8 +67,8 @@ class ReportGenerator
             $format,
         );
 
-        $path = config( 'artisanpack.compliance.compliance.reporting.storage_path', 'compliance-reports' ) . '/' . $filename;
-        $disk = config( 'artisanpack.compliance.compliance.reporting.storage_disk', 'local' );
+        $path = config( 'artisanpack.compliance.reporting.storage_path', 'compliance-reports' ) . '/' . $filename;
+        $disk = config( 'artisanpack.compliance.reporting.storage_disk', 'local' );
 
         Storage::disk( $disk )->put( $path, $content );
 
@@ -80,8 +80,8 @@ class ReportGenerator
      */
     public function getHistory( ?string $type = null, int $limit = 20 ): Collection
     {
-        $disk = config( 'artisanpack.compliance.compliance.reporting.storage_disk', 'local' );
-        $path = config( 'artisanpack.compliance.compliance.reporting.storage_path', 'compliance-reports' );
+        $disk = config( 'artisanpack.compliance.reporting.storage_disk', 'local' );
+        $path = config( 'artisanpack.compliance.reporting.storage_path', 'compliance-reports' );
 
         $files = Storage::disk( $disk )->files( $path );
 

@@ -168,7 +168,7 @@ class ErasureService
             ] );
 
             // Generate certificate if configured
-            if ( config( 'artisanpack.compliance.compliance.erasure.generate_certificate', true ) ) {
+            if ( config( 'artisanpack.compliance.erasure.generate_certificate', true ) ) {
                 $this->generateCertificate( $request );
             }
 

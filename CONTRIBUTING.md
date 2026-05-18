@@ -1,6 +1,6 @@
 # Contributing to ArtisanPack UI
 
-As an open source project, ArtisanPack UI is open to contributions from everyone. You don't need to be a developer to contribute. Whether it's contributing code, writing documentation, testing the CMS or anything in between there's a place for you here to contribute.
+As an open source project, ArtisanPack UI is open to contributions from everyone. You don't need to be a developer to contribute. Whether it's contributing code, writing documentation, testing the packages, or anything in between, there's a place for you here to contribute.
 
 ## Table of Contents
 
@@ -21,8 +21,8 @@ In order to make this a best place for everyone to contribute, there are some ha
 
 * ArtisanPack UI is open to everyone no matter your race, ethnicity, gender, who you love, etc. In order to keep it that way, there's zero tolerance for any racist, misogynistic, xenophobic, bigoted, Zionist, antisemitic (yes, there is a difference), Islamophobic, etc. messages. This includes messages sent to a fellow contributor outside of this repository. In short, don't be a jerk. Failure to comply will result in a ban from the project.
 * Be respectful when communicating with fellow contributors.
-* Respect the decisions made for what to include in the CMS.
-* Work together to create the best possible content management system.
+* Respect the decisions made for what to include in the package.
+* Work together to create the best possible developer toolkit.
 
 ## Ways to Contribute
 
@@ -31,7 +31,7 @@ There are a ton of different ways to contribute to ArtisanPack UI even if you're
 * Write code for ArtisanPack UI core
 * Create plugins to extend ArtisanPack UI
 * Create themes to add designs for ArtisanPack UI
-* Test and report bugs found in the CMS
+* Test and report bugs found in the packages
 * Write documentation
 * Write tutorials and talk about ArtisanPack UI on your blog and/or social media profiles
 * Review pull/merge requests
@@ -44,7 +44,7 @@ There are a ton of different ways to contribute to ArtisanPack UI even if you're
 
 Before contributing, make sure you have:
 - Git installed on your machine
-- PHP 8.1 or higher
+- PHP 8.2 or higher
 - Composer
 - A GitLab, GitHub, or other Git hosting account
 
@@ -465,7 +465,7 @@ Similar to GitHub process:
 
 5. **Submit patch**
    - Create GitLab issue (no account needed via email)
-   - Or email patch to: [your email or link to contribution email]
+   - Or email patch to: support@artisanpackui.dev
    - Describe changes in issue/email
    - Attach `.patch` file
 
@@ -547,7 +547,7 @@ To keep things consistent across the code base, it's important to follow these n
 
 Follow conventional commit format:
 
-```
+```text
 type: Short description
 
 Longer description if needed.
@@ -565,7 +565,7 @@ Closes #123
 - `chore:` - Maintenance tasks
 
 **Examples:**
-```
+```text
 feat: Add dark mode support
 
 Implements dark mode theme with toggle in settings.
@@ -574,7 +574,7 @@ Includes proper color contrast for accessibility.
 Closes #456
 ```
 
-```
+```text
 fix: Resolve navigation menu overlap on mobile
 
 Menu was overlapping content on screens < 768px.

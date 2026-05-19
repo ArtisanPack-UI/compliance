@@ -1,6 +1,6 @@
-# Contributing to compliance
+# Contributing to ArtisanPack UI
 
-As an open-source project, the `artisanpack-ui/compliance` package is open to contributions from everyone. You don't need to be a developer to contribute. Whether it's writing code, improving documentation, exercising the package against your own Laravel app and reporting bugs, or helping triage issues, there's a place for you here.
+As an open source project, ArtisanPack UI is open to contributions from everyone. You don't need to be a developer to contribute. Whether it's contributing code, writing documentation, testing the packages, or anything in between, there's a place for you here to contribute.
 
 ## Table of Contents
 
@@ -9,7 +9,7 @@ As an open-source project, the `artisanpack-ui/compliance` package is open to co
 - [Getting Started](#getting-started)
 - [Issue Templates](#issue-templates)
 - [Branching Strategy](#branching-strategy)
-- [Pull Request Process](#pull-request-process)
+- [Merge Request Process](#merge-request-process)
 - [Label System](#label-system)
 - [Milestone Strategy](#milestone-strategy)
 - [Forking and Contributing](#forking-and-contributing)
@@ -17,23 +17,25 @@ As an open-source project, the `artisanpack-ui/compliance` package is open to co
 
 ## Code of Conduct
 
-To make this the best place for everyone to contribute, there are some hard and fast rules that everyone needs to abide by.
+In order to make this a best place for everyone to contribute, there are some hard and fast rules that everyone needs to abide by.
 
-* This package is open to everyone no matter your race, ethnicity, gender, who you love, etc. To keep it that way, there's zero tolerance for any racist, misogynistic, xenophobic, bigoted, Zionist, antisemitic (yes, there is a difference), Islamophobic, etc. messages. This includes messages sent to a fellow contributor outside this repository. In short, don't be a jerk. Failure to comply will result in a ban from the project.
+* ArtisanPack UI is open to everyone no matter your race, ethnicity, gender, who you love, etc. In order to keep it that way, there's zero tolerance for any racist, misogynistic, xenophobic, bigoted, Zionist, antisemitic (yes, there is a difference), Islamophobic, etc. messages. This includes messages sent to a fellow contributor outside of this repository. In short, don't be a jerk. Failure to comply will result in a ban from the project.
 * Be respectful when communicating with fellow contributors.
-* Respect the decisions made about what belongs in the package.
-* Work together to make `compliance` the best compliance toolkit it can be — consent workflows, DSR handling (erasure + portability), DPIA support, data minimization, retention automation, compliance monitoring, and reporting.
+* Respect the decisions made for what to include in the package.
+* Work together to create the best possible developer toolkit.
 
 ## Ways to Contribute
 
-There are a lot of ways to contribute to `compliance` even if you're not a developer. Here are some (but not all) of them:
+There are a ton of different ways to contribute to ArtisanPack UI even if you're not a developer. Here are some (but not all) of the ways you can contribute to the project:
 
-* Write code for the package — consent services, DSR processors, DPIA helpers, retention-policy engines, anonymization / pseudonymization, compliance check implementations, and reporting adapters
-* Add or improve tests, including consent / DSR fixtures and retention-policy scenarios
-* Test the package against your own Laravel app and report bugs
-* Write documentation, examples, and recipes
-* Talk about `compliance` on your blog or social media
-* Review pull requests
+* Write code for the package
+* Build integrations or extensions on top of the package
+* Improve the package's tests, docs, and examples
+* Test and report bugs found in the package
+* Write documentation
+* Write tutorials and talk about ArtisanPack UI on your blog and/or social media profiles
+* Review pull/merge requests
+* Improve existing code
 * Help answer questions in issues
 
 ## Getting Started
@@ -42,9 +44,9 @@ There are a lot of ways to contribute to `compliance` even if you're not a devel
 
 Before contributing, make sure you have:
 - Git installed on your machine
-- PHP 8.1 or higher
+- PHP 8.2 or higher
 - Composer
-- A GitHub account
+- A GitLab, GitHub, or other Git hosting account
 
 ### Setting Up Your Development Environment
 
@@ -71,7 +73,8 @@ Use this template when you've found a bug. It will ask for:
 - **Screenshots** - If applicable
 
 The template automatically applies these labels:
-- `bug`
+- `Type::Bug`
+- `Status::Backlog`
 
 **You should also add:**
 - `Priority::*` (Critical, High, Medium, or Low) if urgent
@@ -86,7 +89,8 @@ Use this when suggesting new functionality. It will ask for:
 - **Use cases** - How would this be used?
 
 The template automatically applies:
-- `enhancement`
+- `Type::Feature`
+- `Status::Backlog`
 
 ### Enhancement Template
 
@@ -97,7 +101,8 @@ Use this for improvements to existing features. It will ask for:
 - **Backwards compatibility** - Will this break anything?
 
 The template automatically applies:
-- `enhancement`
+- `Type::Enhancement`
+- `Status::Backlog`
 
 ### Task Template
 
@@ -107,7 +112,7 @@ Use this for general tasks that don't fit other categories. It will ask for:
 - **Context** - Why this is needed
 
 The template automatically applies:
-- `task`
+- `Status::Backlog`
 
 ### Submitting Your Issue
 
@@ -118,7 +123,7 @@ After filling out the template:
 4. Submit the issue
 5. A maintainer will review and triage it
 
-**Note:** New issues are initially unassigned to a milestone. A maintainer assigns one during triage — `Future Release` for ideas under consideration without a timeline, or a specific version (e.g. `v1.0`, `v1.1`) once scheduled.
+**Note:** New issues start without a milestone assignment. A maintainer reviews them during triage and either assigns them to a specific version, marks them as `Future Release` (under consideration, not yet scheduled), or closes them.
 
 ## Branching Strategy
 
@@ -164,34 +169,34 @@ git checkout -b fix/your-bugfix
 1. **Create branch** from `main`
 2. **Make changes** and commit
 3. **Push** to your fork
-4. **Create PR** to `main` branch
+4. **Create MR** to `main` branch
 5. **Wait for review** from maintainer
 6. **Address feedback** if needed
 7. **Maintainer merges** when approved
 
-**Important:** Always create your branch from `main` and target `main` in your pull request.
+**Important:** Always create your branch from `main` and target `main` in your merge request.
 
-## Pull Request Process
+## Merge Request Process
 
-### Before Creating a Pull Request
+### Before Creating a Merge Request
 
-1. **Ensure there isn't an existing PR** for the same change
-2. **Create or link to an issue** - All PRs should reference an issue
+1. **Ensure there isn't an existing MR** for the same change
+2. **Create or link to an issue** - All MRs should reference an issue
 3. **Test your changes** locally
 4. **Run code linting** - Follow the naming conventions
 5. **Update documentation** if needed
 
-### Creating Your Pull Request
+### Creating Your Merge Request
 
-We have templates for different types of pull requests:
+We have templates for different types of merge requests:
 
 #### Default Template (Bug Fixes, Features, Enhancements, Tasks)
 
-Use this for most PRs. It includes:
+Use this for most MRs. It includes:
 - Description of changes
 - Type of change (Bug fix, Feature, Enhancement, etc.)
 - Testing performed
-- **Accessibility tests** (required for all UI changes)
+- **Tests for the change** (unit and/or feature; required for code changes)
 - Tests added
 - Documentation updates
 - Pre-submission checklist
@@ -205,30 +210,30 @@ The template automatically applies:
 
 #### Release Template (Maintainers Only)
 
-This template is for release pull requests and should only be used by maintainers.
+This template is for release merge requests and should only be used by maintainers.
 
-### Pull Request Guidelines
+### Merge Request Guidelines
 
 **For External Contributors:**
-1. Create your PR using the Default template
+1. Create your MR using the Default template
 2. Fill out all sections completely
 3. Link to the related issue: `Closes #123`
 4. Wait for maintainer review
 5. Address any feedback promptly
-6. A maintainer will approve and merge your PR
+6. A maintainer will approve and merge your MR
 
-**Note:** All PRs require maintainer approval. External contributors cannot merge their own PRs.
+**Note:** All MRs require maintainer approval. External contributors cannot merge their own MRs.
 
 ### Code Review Process
 
-When you submit a PR:
+When you submit an MR:
 1. A maintainer will review within 1-3 days
 2. They may request changes or ask questions
 3. Address feedback by pushing new commits
 4. Once approved, the maintainer will merge
 5. Your branch will be automatically deleted
 
-### After Your PR is Merged
+### After Your MR is Merged
 
 - Your changes will be included in the next release
 - The related issue will automatically close
@@ -237,11 +242,11 @@ When you submit a PR:
 
 ## Label System
 
-We use a comprehensive label system to organize issues and pull requests:
+We use a comprehensive label system to organize issues and merge requests:
 
 ### Status Labels (Workflow)
 
-Labels that track where an issue/PR is in the workflow:
+Labels that track where an issue/MR is in the workflow:
 - `Status::Backlog` - Not yet prioritized
 - `Status::To Do` - Ready to work on
 - `Status::In Progress` - Currently being worked on
@@ -273,10 +278,9 @@ Labels that indicate importance:
 ### Area Labels (Where)
 
 Labels that indicate affected code area:
-- `Area::Frontend` - UI/client-side code
-- `Area::Backend` - Server/API code
-- `Area::Design` - Visual design work
-- `Area::Infrastructure` - DevOps/deployment
+- `Area::Core` - Core package logic
+- `Area::Integration` - Integration with Laravel framework / sibling packages
+- `Area::Infrastructure` - DevOps/deployment / CI
 - `Area::Testing` - Test-related work
 
 ### Special Labels
@@ -318,108 +322,163 @@ When you create an issue:
 
 ## Forking and Contributing
 
-`compliance` is hosted on GitHub at [ArtisanPack-UI/compliance](https://github.com/ArtisanPack-UI/compliance). The fork-and-PR flow is the canonical contribution path; the Bitbucket and patch-file flows below exist for contributors who can't or don't want to use GitHub directly.
+ArtisanPack UI is primarily hosted on GitLab, but you can contribute from any Git hosting platform.
 
-### From GitHub (Primary)
+### From GitLab (Primary)
+
+**Easiest method:**
 
 1. **Fork the repository**
-   - Visit [ArtisanPack-UI/compliance](https://github.com/ArtisanPack-UI/compliance)
-   - Click "Fork" — the fork will land in your account
+   - Go to the project page
+   - Click "Fork" button
+   - Fork will be created in your account
 
 2. **Clone your fork**
    ```bash
-   git clone git@github.com:your-username/compliance.git
-   cd compliance
+   git clone git@gitlab.com:your-username/package-name.git
+   cd package-name
    ```
 
 3. **Add upstream remote**
    ```bash
-   git remote add upstream git@github.com:ArtisanPack-UI/compliance.git
+   git remote add upstream git@gitlab.com:jacob-martella-web-design/artisanpack-ui/package-name.git
    ```
 
-4. **Create a feature branch from `main`**
+4. **Create feature branch**
    ```bash
    git checkout -b feature/your-feature
    ```
 
-5. **Make changes, commit, and push**
+5. **Make changes and push**
    ```bash
    git add .
-   git commit -m "feat: short description"
+   git commit -m "Add your feature"
    git push origin feature/your-feature
    ```
 
-6. **Open a Pull Request**
-   - On your fork, click "Compare & pull request"
-   - Target `ArtisanPack-UI/compliance:main`
-   - Fill out the PR template (CodeRabbit will auto-review)
+6. **Create Merge Request**
+   - Go to your fork on GitLab
+   - Click "Create merge request"
+   - Target the original repository's `main` branch
+   - Fill out the MR template
    - Submit
+
+### From GitHub
+
+**If you prefer GitHub:**
+
+1. **Clone on GitLab** (even without account)
+   ```bash
+   git clone https://gitlab.com/jacob-martella-web-design/artisanpack-ui/package-name.git
+   cd package-name
+   ```
+
+2. **Create repository on GitHub**
+   - Go to GitHub and create a new repository
+   - Don't initialize with README
+
+3. **Add GitHub as remote**
+   ```bash
+   git remote add github git@github.com:your-username/package-name.git
+   ```
+
+4. **Create feature branch**
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+
+5. **Make changes and push to GitHub**
+   ```bash
+   git add .
+   git commit -m "Add your feature"
+   git push github feature/your-feature
+   ```
+
+6. **Create Pull Request**
+   - Create PR on GitHub as normal
+   - Mention you're contributing to a GitLab project
+   - Include: "This PR is for GitLab project: [link]"
+
+7. **Maintainer will create GitLab MR**
+   - Maintainer will pull your changes
+   - Create MR on GitLab
+   - Credit you in commits
+
+**Note:** This requires maintainer coordination. GitLab forks are preferred.
 
 ### From Bitbucket
 
-Bitbucket users can mirror their work to a GitHub fork before opening a PR:
+Similar to GitHub process:
 
-1. **Clone from GitHub**
+1. **Clone from GitLab**
    ```bash
-   git clone https://github.com/ArtisanPack-UI/compliance.git
-   cd compliance
+   git clone https://gitlab.com/jacob-martella-web-design/artisanpack-ui/package-name.git
+   cd package-name
    ```
 
-2. **Create a Bitbucket repository for your working copy**
+2. **Create Bitbucket repository**
 
-3. **Add Bitbucket as a remote**
+3. **Add Bitbucket remote**
    ```bash
-   git remote add bitbucket git@bitbucket.org:your-username/compliance.git
+   git remote add bitbucket git@bitbucket.org:your-username/package-name.git
    ```
 
-4. **Develop on a feature branch and push to Bitbucket**
+4. **Push to Bitbucket**
    ```bash
    git checkout -b feature/your-feature
    # ... make changes ...
    git push bitbucket feature/your-feature
    ```
 
-5. **Mirror to GitHub and open a PR**
-   - Create a GitHub fork (see Primary flow above)
-   - Add it as a remote and push your branch there
-   - Open a PR against `ArtisanPack-UI/compliance:main`
+5. **Notify maintainer**
+   - Create issue on GitLab: "Contribution available"
+   - Link to your Bitbucket branch
+   - Maintainer will integrate
 
 ### From Local Git (No Account)
 
-If you can't use GitHub at all, submit a patch:
+**If you don't want any hosting account:**
 
-1. **Clone the project**
+1. **Clone project**
    ```bash
-   git clone https://github.com/ArtisanPack-UI/compliance.git
-   cd compliance
+   git clone https://gitlab.com/jacob-martella-web-design/artisanpack-ui/package-name.git
+   cd package-name
    ```
 
-2. **Create a feature branch and make your changes**
+2. **Create feature branch**
    ```bash
    git checkout -b feature/your-feature
-   git add .
-   git commit -m "feat: short description"
    ```
 
-3. **Create a patch file**
+3. **Make changes**
+   ```bash
+   # ... work on your feature ...
+   git add .
+   git commit -m "Add your feature"
+   ```
+
+4. **Create patch file**
    ```bash
    git format-patch main --stdout > my-contribution.patch
    ```
 
-4. **Submit the patch**
-   - Open an issue on the GitHub tracker and attach the `.patch` file
-   - Describe the change in the issue body
-   - A maintainer will pick it up during triage
+5. **Submit patch**
+   - Create GitLab issue (no account needed via email)
+   - Or email patch to: support@artisanpackui.dev
+   - Describe changes in issue/email
+   - Attach `.patch` file
 
-5. **Maintainer applies the patch**
+6. **Maintainer applies patch**
    ```bash
-   git am my-contribution.patch
+   git apply my-contribution.patch
    ```
 
 ### Keeping Your Fork Updated
 
+**For GitLab forks:**
+
 ```bash
-# Fetch upstream changes from ArtisanPack-UI/compliance
+# Fetch upstream changes
 git fetch upstream
 
 # Merge into your main
@@ -430,15 +489,31 @@ git merge upstream/main
 git push origin main
 ```
 
+**For other platforms:**
+
+```bash
+# Add GitLab as upstream
+git remote add upstream https://gitlab.com/jacob-martella-web-design/artisanpack-ui/package-name.git
+
+# Fetch and merge
+git fetch upstream
+git checkout main
+git merge upstream/main
+
+# Push to your platform
+git push origin main  # or 'github' or 'bitbucket'
+```
+
 ### Contribution Workflow Summary
 
-| Path | Difficulty | Preferred? | Notes |
-|------|------------|------------|-------|
-| GitHub fork + PR | ⭐ Easy | ✅ Yes | Canonical flow; CI + CodeRabbit run automatically |
-| Bitbucket mirror → GitHub PR | ⭐⭐ Medium | ⚠️ Okay | Develop on Bitbucket, mirror to a GitHub fork to open the PR |
-| Local patch file | ⭐⭐⭐ Advanced | ⚠️ Last resort | For contributors who can't use GitHub |
+| Platform | Difficulty | Preferred? | Notes |
+|----------|-----------|------------|-------|
+| GitLab Fork | ⭐ Easy | ✅ Yes | Native workflow, use this if possible |
+| GitHub | ⭐⭐ Medium | ⚠️ Okay | Requires maintainer coordination |
+| Bitbucket | ⭐⭐ Medium | ⚠️ Okay | Requires maintainer coordination |
+| Local/Patch | ⭐⭐⭐ Advanced | ⚠️ Last resort | For privacy or no-account contributors |
 
-**Recommendation:** Use the GitHub fork + PR flow whenever possible — it's the smoothest path and the only one that gets automated CI + CodeRabbit feedback before maintainer review.
+**Recommendation:** Use GitLab fork whenever possible for the smoothest contribution experience.
 
 ## Naming Conventions
 
@@ -489,7 +564,6 @@ Closes #123
 - `chore:` - Maintenance tasks
 
 **Examples:**
-
 ```text
 feat: Add dark mode support
 
@@ -532,6 +606,6 @@ We appreciate your time and effort! 🎉
 
 ---
 
-**Project Maintainer:** Jacob Martella ([@ViewFromTheBox](https://github.com/ViewFromTheBox))  
+**Project Maintainer:** Jacob Martella ([@viewfromthebox94](https://gitlab.com/viewfromthebox94))  
 **License:** [MIT](LICENSE)
 **Website:** [https://jacobmartella.me](https://jacobmartella.me)

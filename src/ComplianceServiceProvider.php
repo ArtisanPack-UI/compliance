@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Service provider for the Compliance package — wires services, migrations, routes, middleware, listeners, and the dashboard Gate.
+ *
+ * @package    ArtisanPack_UI
+ * @subpackage Compliance
+ *
+ * @author     Jacob Martella <support@artisanpackui.dev>
+ *
+ * @since      1.0.0
+ */
+
 declare( strict_types=1 );
 
 namespace ArtisanPackUI\Compliance;

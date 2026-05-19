@@ -28,10 +28,10 @@ In order to make this a best place for everyone to contribute, there are some ha
 
 There are a ton of different ways to contribute to ArtisanPack UI even if you're not a developer. Here are some (but not all) of the ways you can contribute to the project:
 
-* Write code for ArtisanPack UI core
-* Create plugins to extend ArtisanPack UI
-* Create themes to add designs for ArtisanPack UI
-* Test and report bugs found in the packages
+* Write code for the package
+* Build integrations or extensions on top of the package
+* Improve the package's tests, docs, and examples
+* Test and report bugs found in the package
 * Write documentation
 * Write tutorials and talk about ArtisanPack UI on your blog and/or social media profiles
 * Review pull/merge requests
@@ -196,7 +196,7 @@ Use this for most MRs. It includes:
 - Description of changes
 - Type of change (Bug fix, Feature, Enhancement, etc.)
 - Testing performed
-- **Accessibility tests** (required for all UI changes)
+- **Tests for the change** (unit and/or feature; required for code changes)
 - Tests added
 - Documentation updates
 - Pre-submission checklist
@@ -278,10 +278,9 @@ Labels that indicate importance:
 ### Area Labels (Where)
 
 Labels that indicate affected code area:
-- `Area::Frontend` - UI/client-side code
-- `Area::Backend` - Server/API code
-- `Area::Design` - Visual design work
-- `Area::Infrastructure` - DevOps/deployment
+- `Area::Core` - Core package logic
+- `Area::Integration` - Integration with Laravel framework / sibling packages
+- `Area::Infrastructure` - DevOps/deployment / CI
 - `Area::Testing` - Test-related work
 
 ### Special Labels
@@ -336,8 +335,8 @@ ArtisanPack UI is primarily hosted on GitLab, but you can contribute from any Gi
 
 2. **Clone your fork**
    ```bash
-   git clone git@gitlab.com:your-username/artisanpack-ui-package.git
-   cd artisanpack-ui-package
+   git clone git@gitlab.com:your-username/package-name.git
+   cd package-name
    ```
 
 3. **Add upstream remote**

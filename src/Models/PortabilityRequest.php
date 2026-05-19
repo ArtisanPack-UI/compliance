@@ -62,7 +62,7 @@ class PortabilityRequest extends Model
             return false;
         }
 
-        if ( null !== $this->expires_at && $this->expires_at->isPast() ) {
+        if ( null !== $this->expires_at && $this->expires_at->lte( now() ) ) {
             return false;
         }
 

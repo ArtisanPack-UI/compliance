@@ -55,6 +55,19 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
+      - name: Validate tag version matches composer.json
+        run: |
+          TAG_VERSION="${{ steps.version.outputs.version }}"
+          COMPOSER_VERSION=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' composer.json | head -n1)
+          if [ -z "$COMPOSER_VERSION" ]; then
+            echo "Unable to read composer.json version"
+            exit 1
+          fi
+          if [ "$TAG_VERSION" != "$COMPOSER_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match composer.json version ($COMPOSER_VERSION)"
+            exit 1
+          fi
+
       - name: Extract release notes from CHANGELOG
         id: changelog
         run: |

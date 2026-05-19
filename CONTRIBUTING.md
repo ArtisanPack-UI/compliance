@@ -123,7 +123,7 @@ After filling out the template:
 4. Submit the issue
 5. A maintainer will review and triage it
 
-**Note:** Issues are initially added to the "Future Release" milestone until they're scheduled for a specific version.
+**Note:** New issues start without a milestone assignment. A maintainer reviews them during triage and either assigns them to a specific version, marks them as `Future Release` (under consideration, not yet scheduled), or closes them.
 
 ## Branching Strategy
 

@@ -25,7 +25,7 @@ This package is part of the **ArtisanPack UI Security 2.0** split — the privac
 composer require artisanpack-ui/compliance
 ```
 
-Run the migrations to create the 18 compliance tables:
+Run the migrations to create the 17 compliance tables:
 
 ```bash
 php artisan migrate
@@ -64,9 +64,10 @@ Route::post( '/track', [TrackingController::class, 'store'] )
 ```php
 use ArtisanPackUI\Compliance\Models\ErasureRequest;
 use ArtisanPackUI\Compliance\Compliance\Erasure\ErasureService;
+use Illuminate\Support\Str;
 
 $request = ErasureRequest::create( [
-    'request_number' => 'ER-' . str_pad( (string) ( ErasureRequest::count() + 1 ), 6, '0', STR_PAD_LEFT ),
+    'request_number' => 'ER-' . (string) Str::ulid(),
     'user_id'        => $user->id,
     'requester_type' => 'self',
     'scope'          => 'full',

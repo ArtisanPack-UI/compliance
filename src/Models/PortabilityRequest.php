@@ -17,6 +17,8 @@ namespace ArtisanPackUI\Compliance\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class PortabilityRequest extends Model
 {
@@ -69,8 +71,24 @@ class PortabilityRequest extends Model
 
     public function incrementDownloadCount(): void
     {
-        $this->increment( 'download_count' );
-        $this->forceFill( ['downloaded_at' => now()] )->save();
+        $updated = self::query()
+            ->whereKey( $this->getKey() )
+            ->where( 'status', 'completed' )
+            ->where( function ( Builder $query ): void {
+                $query->whereNull( 'expires_at' )
+                    ->orWhere( 'expires_at', '>', now() );
+            } )
+            ->whereColumn( 'download_count', '<', 'download_limit' )
+            ->update( [
+                'download_count' => DB::raw( 'download_count + 1' ),
+                'downloaded_at'  => now(),
+            ] );
+
+        if ( 0 === $updated ) {
+            throw new RuntimeException( 'Download no longer allowed.' );
+        }
+
+        $this->refresh();
     }
 
     protected function casts(): array

@@ -60,9 +60,10 @@ The middleware aborts 403 if there is no active granted-and-unexpired `ConsentRe
 
 ```php
 use ArtisanPackUI\Compliance\Models\ErasureRequest;
+use Illuminate\Support\Str;
 
 $request = ErasureRequest::create( [
-    'request_number' => 'ER-' . str_pad( (string) ( ErasureRequest::count() + 1 ), 6, '0', STR_PAD_LEFT ),
+    'request_number' => 'ER-' . (string) Str::ulid(),
     'user_id'        => $user->id,
     'requester_type' => 'self',
     'scope'          => 'full',
@@ -94,9 +95,10 @@ The command picks up pending requests, runs them through the service, and stops 
 
 ```php
 use ArtisanPackUI\Compliance\Models\PortabilityRequest;
+use Illuminate\Support\Str;
 
 $request = PortabilityRequest::create( [
-    'request_number' => 'PR-' . str_pad( (string) ( PortabilityRequest::count() + 1 ), 6, '0', STR_PAD_LEFT ),
+    'request_number' => 'PR-' . (string) Str::ulid(),
     'user_id'        => $user->id,
     'requester_type' => 'self',
     'format'         => 'json',

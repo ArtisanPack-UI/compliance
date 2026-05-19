@@ -46,7 +46,7 @@ class RiskMitigation extends Model
     public function isOverdue(): bool
     {
         return null !== $this->due_date
-            && $this->due_date->isPast()
+            && $this->due_date->lt( today() )
             && ! in_array( $this->status, ['implemented', 'verified'], true );
     }
 

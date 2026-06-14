@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-06-14
+
+### Added
+
+- **Laravel 13 support** — widened `illuminate/support` constraint to `^10.0|^11.0|^12.0|^13.0` so consumer apps (and `artisanpack-ui/security-full`, which pulls Compliance in transitively) can adopt Laravel 13. PHP `^8.2` is preserved; Composer's solver picks Laravel 10/11/12 on PHP 8.2 and only picks Laravel 13 on PHP 8.3+. (#15)
+
+### Changed
+
+- **CI matrix** — `Test` job now runs across Laravel 12/13 × PHP 8.2/8.3/8.4 (excluding L13/PHP 8.2, which Laravel 13 itself forbids). Workflow also gained `release/**` triggers and least-privilege `permissions: contents: read` + `persist-credentials: false` hardening.
+- **Dev dependency constraints widened to unblock the Laravel 13 leg** —
+  - `pestphp/pest` → `^3.8|^4.0`
+  - `pestphp/pest-plugin-laravel` → `^3.2|^4.0`
+  - `orchestra/testbench` → `^10.2|^11.0`
+
 ## [1.0.0] - 2026-05-18
 
 ### Added

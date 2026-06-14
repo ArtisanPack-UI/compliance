@@ -3,7 +3,7 @@
   "description": "Compliance toolkit for Laravel — GDPR / CCPA / LGPD consent management, data subject rights (erasure + portability), DPIA / processing-activity records, data minimization (anonymization + pseudonymization), retention policies, compliance monitoring + reporting.",
   "type": "library",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "laravel",
     "compliance",
@@ -37,7 +37,7 @@
   ],
   "require": {
     "php": "^8.2",
-    "illuminate/support": "^10.0|^11.0|^12.0",
+    "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
     "artisanpack-ui/core": "^1.0"
   },
   "require-dev": {
@@ -46,9 +46,9 @@
     "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
     "friendsofphp/php-cs-fixer": "^3.75",
     "laravel/pint": "^1.26",
-    "orchestra/testbench": "^10.2",
-    "pestphp/pest": "^3.8",
-    "pestphp/pest-plugin-laravel": "^3.2"
+    "orchestra/testbench": "^10.2|^11.0",
+    "pestphp/pest": "^3.8|^4.0",
+    "pestphp/pest-plugin-laravel": "^3.2|^4.0"
   },
   "scripts": {
     "lint": [

@@ -3,7 +3,7 @@
 ## Requirements
 
 - PHP 8.2+
-- Laravel 10, 11, or 12
+- Laravel 10, 11, 12, or 13 (Laravel 13 requires PHP 8.3+)
 - A database supported by Eloquent — SQLite, MySQL, PostgreSQL, SQL Server. The schema uses standard column types (string / text / json / decimal / timestamp / boolean) so any current Laravel-supported driver works.
 
 ## Install via Composer

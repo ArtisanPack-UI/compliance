@@ -3,7 +3,7 @@
   "description": "Compliance toolkit for Laravel — GDPR / CCPA / LGPD consent management, data subject rights (erasure + portability), DPIA / processing-activity records, data minimization (anonymization + pseudonymization), retention policies, compliance monitoring + reporting.",
   "type": "library",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "laravel",
     "compliance",

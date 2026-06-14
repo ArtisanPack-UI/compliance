@@ -131,7 +131,7 @@ Register implementations in your service provider; the orchestrators discover th
 ## Requirements
 
 - PHP 8.2+
-- Laravel 10 / 11 / 12
+- Laravel 10 / 11 / 12 / 13 (Laravel 13 requires PHP 8.3+)
 
 ## Sibling packages
 

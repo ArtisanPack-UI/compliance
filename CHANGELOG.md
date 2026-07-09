@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **PHP 8.2 support dropped** — minimum PHP is now 8.3. The AI features added in this release depend on `artisanpack-ui/ai`, which requires PHP 8.3+, so the CI matrix (and the package's own `require`) can no longer honor 8.2. Apps still on PHP 8.2 should stay on `1.0.x`.
+
 ### Security
 
 - **Authorization gate on draft persistence** — `AiTools::saveDraft` now checks a `manageComplianceAiDrafts` Gate (default-deny, override in the app's `AuthServiceProvider`) before writing to `compliance_ai_drafts`. Previously any browser session that reached a page mounting the component could persist forged drafts.

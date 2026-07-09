@@ -219,8 +219,8 @@ Every response follows the shape `{ feature: string, output: object }` on succes
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 10 / 11 / 12 / 13 (Laravel 13 requires PHP 8.3+)
+- PHP 8.3+
+- Laravel 10 / 11 / 12 / 13
 
 ## Sibling packages
 

@@ -60,11 +60,7 @@ jobs:
       fail-fast: true
       matrix:
         laravel: ['12', '13']
-        php: ['8.2', '8.3', '8.4']
-        exclude:
-          # Laravel 13 requires PHP 8.3+
-          - laravel: '13'
-            php: '8.2'
+        php: ['8.3', '8.4']
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -90,10 +86,8 @@ jobs:
           restore-keys: ${{ runner.os }}-php${{ matrix.php }}-laravel${{ matrix.laravel }}-composer-
 
       - name: Align composer platform PHP with the matrix
-        # The repo's composer.json pins config.platform.php to 8.2 so local
-        # composer.lock stays installable on the lowest supported PHP. In CI we
-        # need composer to resolve against the matrix PHP so the Laravel 13 leg
-        # (PHP 8.3+) can install.
+        # Ensure composer resolves against the matrix PHP even if a
+        # future composer.json pins a platform floor.
         run: composer config platform.php ${{ matrix.php }}
 
       - name: Remove lint-only dev dependencies

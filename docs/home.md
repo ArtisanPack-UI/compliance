@@ -12,7 +12,7 @@ A Laravel package that wraps the GDPR / CCPA / LGPD compliance surface in a set 
 
 ## Architecture at a glance
 
-The package is organized into seven domains:
+The package is organized into eight domains:
 
 | Domain | Public entry | Persistence |
 |---|---|---|
@@ -23,6 +23,7 @@ The package is organized into seven domains:
 | Minimization | `DataMinimizerService` + Anonymization / Pseudonymization engines | (none — operates on app data) |
 | Retention | `PurgeExpiredData` command + `RetentionPolicy` / `CollectionPolicy` | `retention_policies`, `collection_policies` |
 | Monitoring + reporting | `ComplianceMonitor` + `ComplianceCheckInterface`; `ReportGenerator` + `ReportTypeInterface` | `compliance_check_results`, `compliance_violations`, `compliance_scores`, `scheduled_compliance_reports` |
+| AI (optional, since 1.1.0) | `PrivacyPolicyDraftAgent`, `DpiaAssistanceAgent`, `ConsentTextSuggestionAgent`; `AiTools` Livewire component; `/api/v1/compliance/ai/*` REST | `compliance_ai_drafts` (append-only) |
 
 Every domain follows the same pattern: a thin orchestrator service that delegates to small, interface-bound implementations. You can plug in your own implementation of any interface and the rest of the system picks it up via Laravel's container.
 

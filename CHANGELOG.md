@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-09
+
+### Changed
+
+- **PHP 8.2 support dropped** — minimum PHP is now 8.3. The AI features added in this release depend on `artisanpack-ui/ai`, which requires PHP 8.3+, so the CI matrix (and the package's own `require`) can no longer honor 8.2. Apps still on PHP 8.2 should stay on `1.0.x`.
+
+### Security
+
+- **Authorization gate on draft persistence** — `AiTools::saveDraft` now checks a `manageComplianceAiDrafts` Gate (default-deny, override in the app's `AuthServiceProvider`) before writing to `compliance_ai_drafts`. Previously any browser session that reached a page mounting the component could persist forged drafts.
+- **Configurable auth guard** — the `/api/v1/compliance/ai/*` REST routes now read the guard from `config('artisanpack.compliance.ai.guard')` (default `sanctum`, override via `COMPLIANCE_AI_GUARD`). Consumer apps without Sanctum can point at `web` or any configured guard, replacing the previous hard-coded `auth:sanctum` that 500'd when Sanctum wasn't installed.
+
+### Fixed
+
+- **Feature-toggle bypass on save** — `AiTools::saveDraft` now rejects saves when the feature is toggled OFF in the FeatureRegistry (was only checking `AI_FEATURE_KEYS` membership).
+- **DPIA risk↔mitigation linkage** — `DpiaAssistanceAgent::validateOutput` now enforces that every enumerated risk has a matching mitigation entry (linked by `risk_title`). Previously the "every risk must have a mitigation" invariant declared in the prompt was not verified in code, so a partial DPIA could ship as valid output.
+- **Privacy-policy input validation** — `PrivacyPolicyDraftAgent` now rejects non-array elements in `processing_activities`, closing a Livewire-only path (REST callers were already covered by the FormRequest) that could send mixed lists to the prompter.
+- **Consent-text short label** — `ConsentTextSuggestionAgent` now throws `FeatureError` when the model returns an empty `short_label`. An unlabelled consent checkbox does not meet the "clear affirmative act" standard.
+
+### Added
+
+- **AI integration** — three high-stakes agents powered by `artisanpack-ui/ai` (soft dependency):
+  - `compliance.privacy_policy_draft` (`PrivacyPolicyDraftAgent`, default model `claude-opus-4-7`) — drafts a starter privacy policy from declared processing activities.
+  - `compliance.dpia_assistance` (`DpiaAssistanceAgent`, default model `claude-opus-4-7`) — enumerates risks, mitigations, and stakeholder impacts for a DPIA.
+  - `compliance.consent_text` (`ConsentTextSuggestionAgent`, default model `claude-sonnet-4-6`) — suggests plain-language consent text with reading-level score and jurisdiction notes.
+- **Guardrail contract** — every agent forces `requires_legal_review: true` and a non-empty `review_checklist` on its output; the host UI is required to render an un-dismissable "requires legal review" banner and an acknowledgement checkbox before the draft body is shown.
+- **Append-only draft storage** — new `compliance_ai_drafts` table + `AiDraft` model preserve every generation as a new row; the model throws on any attempt to update an existing draft.
+- **Trigger surfaces** — Livewire component `ap-compliance-ai-tools` for Blade/Livewire hosts, plus `/api/v1/compliance/ai/*` REST endpoints (Sanctum-gated) for React and Vue hosts. Both are skipped when `artisanpack-ui/ai` is not installed. (#18, #19, #20)
+
 ## [1.0.1] - 2026-06-14
 
 ### Added

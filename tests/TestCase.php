@@ -4,7 +4,9 @@ declare( strict_types=1 );
 
 namespace Tests;
 
+use ArtisanPackUI\Ai\AiServiceProvider;
 use ArtisanPackUI\Compliance\ComplianceServiceProvider;
+use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 /**
@@ -36,6 +38,8 @@ abstract class TestCase extends BaseTestCase
     protected function getPackageProviders( $app ): array
     {
         return [
+            AiServiceProvider::class,
+            LivewireServiceProvider::class,
             ComplianceServiceProvider::class,
         ];
     }

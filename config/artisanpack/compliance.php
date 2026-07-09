@@ -157,6 +157,15 @@ return [
             'sex_life_orientation',
         ],
 
+        // AI-agent surfaces (privacy-policy draft, DPIA assistance, consent
+        // text). Requires artisanpack-ui/ai to be installed. The guard is
+        // used on the /api/v1/compliance/ai/* REST routes — defaults to
+        // 'sanctum' but consumer apps that don't ship Sanctum can override
+        // via COMPLIANCE_AI_GUARD (e.g. 'web' for session auth).
+        'ai' => [
+            'guard' => env('COMPLIANCE_AI_GUARD', 'sanctum'),
+        ],
+
         // Legal Bases (GDPR Article 6)
         'legal_bases' => [
             'consent' => 'Consent (Art. 6(1)(a))',

@@ -220,3 +220,66 @@ Gate::define( 'viewComplianceDashboard', fn ( $user ) => $user->hasRole( 'compli
 ```
 
 When pairing with `artisanpack-ui/rbac`, the Gate integration ensures `viewComplianceDashboard` resolves against an RBAC permission of the same slug if one exists.
+
+## AI features
+
+*Added in 1.1.0. Requires [`artisanpack-ui/ai`](https://github.com/ArtisanPack-UI/ai). See [Usage → AI features](usage.md#ai-features) for the surface reference; this section covers customization.*
+
+### Authorize draft persistence
+
+Draft writes go through a `manageComplianceAiDrafts` Gate. The package registers a default-deny stub — you must override it before any user can save. In your `AuthServiceProvider`:
+
+```php
+Gate::define( 'manageComplianceAiDrafts', function ( $user ) {
+    return $user->hasAnyRole( [ 'compliance-officer', 'dpo' ] );
+} );
+```
+
+### Change the REST guard
+
+The `/api/v1/compliance/ai/*` routes read the guard from `artisanpack.compliance.ai.guard` (default `sanctum`). For a Livewire-only app that doesn't ship Sanctum:
+
+```php
+// config/artisanpack/compliance.php
+'ai' => [
+    'guard' => env( 'COMPLIANCE_AI_GUARD', 'web' ),
+],
+```
+
+### Customize the AI feature registry
+
+The three compliance agents are auto-discovered by `artisanpack-ui/ai`'s `FeatureRegistry` from `ComplianceServiceProvider::aiFeatures()`. You can toggle them at runtime through the registry:
+
+```php
+use ArtisanPackUI\Ai\Contracts\FeatureRegistry;
+
+app( FeatureRegistry::class )->disable( 'compliance.privacy_policy_draft' );
+```
+
+Or via config in `config/artisanpack/ai.php`:
+
+```php
+'features' => [
+    'compliance.privacy_policy_draft' => [ 'enabled' => true, 'model' => 'claude-sonnet-4-6' ],
+],
+```
+
+The `model` override is useful for smoke-testing without paying Opus rates.
+
+### Draft retention
+
+`AiDraft` rows are append-only at the ORM layer — this is intentional so version history is preserved for legal review. If your organization needs a formal retention window for AI-generated drafts, add a scheduled job that runs `AiDraft::where('created_at', '<', now()->subMonths(24))->delete()` and logs to your audit trail. Hard-delete is the only path in `1.1.0`; there is no `SoftDeletes` column.
+
+### Consuming events on the browser
+
+The Livewire component dispatches five event categories per feature:
+
+- `compliance-ai:{featureKey}:success` — with `output` payload
+- `compliance-ai:{featureKey}:disabled` — feature toggled off
+- `compliance-ai:{featureKey}:missing-credentials` — provider credentials not set
+- `compliance-ai:{featureKey}:invalid-input` — agent rejected the payload (validation)
+- `compliance-ai:{featureKey}:error` — unexpected error
+
+Save-draft events are dispatched under the fixed names `compliance-ai:save-draft:success`, `compliance-ai:save-draft:rejected`, and `compliance-ai:save-draft:error` — the rejected event carries a `message` field naming which guard failed (unknown feature, gate deny, toggle off, missing acknowledgement).
+
+Prefer the JS `Livewire.on()` subscription over inline `x-on:` — event names contain `.` (from the feature key) which Alpine parses as directive modifiers.

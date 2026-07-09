@@ -31,3 +31,33 @@ On the storage disk configured in `config/artisanpack/compliance.php`. The defau
 ## Does the package handle SCC / DPA paperwork?
 
 No — it tracks `ProcessingActivity` records (Article 30 RoPA), which is the precursor / index. It does not generate SCCs or DPA contracts.
+
+## Do I have to install `artisanpack-ui/ai` to use the compliance package?
+
+*Added in 1.1.0.*
+
+No. The AI package is a soft dependency — the compliance package boots and works fully without it. When the AI package is absent, the AI Livewire component and the `/api/v1/compliance/ai/*` REST endpoints simply stay unregistered.
+
+## Is AI-generated output from the agents legal advice?
+
+No. Every high-stakes agent (`PrivacyPolicyDraftAgent`, `DpiaAssistanceAgent`, `ConsentTextSuggestionAgent`) forces `requires_legal_review: true` on its output and includes a `review_checklist` naming things a lawyer must confirm. The host UI is required to render an un-dismissable "requires legal review" banner and gate viewing the draft body behind an acknowledgement checkbox. The package deliberately makes it hard to ship AI output as-is.
+
+## Can I stop a specific AI feature without uninstalling the package?
+
+*Added in 1.1.0.*
+
+Yes — toggle the feature off in the FeatureRegistry (`config/artisanpack/ai.php`):
+
+```php
+'features' => [
+    'compliance.privacy_policy_draft' => [ 'enabled' => false ],
+],
+```
+
+The agent will throw `FeatureDisabledException` when run, the REST endpoint returns 403, and `AiTools::saveDraft` rejects saves for that feature key. The `/features` endpoint reports the disabled state so front-ends can hide the affordance.
+
+## An AI-generated draft turned out wrong — can I delete or edit it?
+
+The `AiDraft` model is append-only at the ORM layer — any UPDATE throws a `RuntimeException`. This is deliberate: the version history is legal evidence. To "correct" a bad draft, save a new draft with the corrected content; both remain in the audit trail.
+
+If you need to hard-delete rows for a GDPR erasure cascade, use `AiDraft::query()->where(...)->delete()` and log the deletion event alongside the erasure trail. There is no soft-delete column in `1.1.0` — hard-delete is the only path.

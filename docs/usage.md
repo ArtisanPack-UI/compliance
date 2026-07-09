@@ -180,6 +180,98 @@ php artisan compliance:generate-report --type=quarterly --format=pdf
 
 `ScheduledComplianceReport` rows drive cron-based recurring delivery. See [Advanced — custom report types](advanced.md#custom-report-types).
 
+## AI features
+
+*Added in 1.1.0. Requires [`artisanpack-ui/ai`](https://github.com/ArtisanPack-UI/ai). See [Installation](installation.md#enable-the-ai-features-optional) for setup.*
+
+The compliance package ships three optional AI trigger surfaces. Every output from every agent is **high-stakes** — the outputs must be reviewed by qualified legal counsel before publication. The package enforces this at three layers so no single caller can bypass it:
+
+- Every agent's output carries `requires_legal_review: true` and a non-empty `review_checklist` (the validators overwrite the model if it tries to omit them).
+- The `AiTools::saveDraft` Livewire handler requires the `manageComplianceAiDrafts` Gate to allow, the FeatureRegistry to have the feature toggled on, AND the payload to include `metadata.acknowledged === true`.
+- The `AiDraft` model is append-only — any UPDATE attempt throws, so the version history is preserved for legal review.
+
+### Agents
+
+| Feature key | Agent | Default model | Purpose |
+|---|---|---|---|
+| `compliance.privacy_policy_draft` | `PrivacyPolicyDraftAgent` | `claude-opus-4-7` | Draft a starter privacy policy from declared processing activities. |
+| `compliance.dpia_assistance` | `DpiaAssistanceAgent` | `claude-opus-4-7` | Enumerate risks, mitigations, and stakeholder impacts for a DPIA. Enforces that every risk has a matching mitigation. |
+| `compliance.consent_text` | `ConsentTextSuggestionAgent` | `claude-sonnet-4-6` | Suggest plain-language consent text with a reading-level score and jurisdiction notes. |
+
+### Trigger from Livewire
+
+Mount the transport component on any admin page:
+
+```blade
+<livewire:ap-compliance-ai-tools />
+```
+
+Dispatch an event to run an agent, then listen for the result on the browser side:
+
+```blade
+<button
+    wire:click="$dispatch('compliance-ai:draft-privacy-policy', {
+        payload: {
+            organization_name: 'Acme',
+            contact_email: 'privacy@acme.example',
+            effective_date: '2026-08-01',
+            jurisdictions: ['EU', 'US-CA'],
+            processing_activities: [
+                { purpose: 'Order fulfillment', data_categories: ['name','address'], legal_basis: 'contract', retention: '5 years' },
+            ],
+        }
+    })"
+>Draft privacy policy</button>
+
+<script>
+Livewire.on('compliance-ai:compliance.privacy_policy_draft:success', ({ output }) => {
+    // 1. Render the un-dismissable "requires legal review" banner.
+    // 2. Render the acknowledgement checkbox.
+    // 3. Only reveal output.policy_markdown after the user acknowledges.
+});
+</script>
+```
+
+Save a draft after the reviewer has acknowledged:
+
+```js
+Livewire.dispatch('compliance-ai:save-draft', {
+    featureKey: 'compliance.privacy_policy_draft',
+    output: agentOutput,
+    subjectKey: 'main-site',
+    metadata: { acknowledged: true, reviewer: 'jane@acme.example' },
+});
+```
+
+The handler emits `compliance-ai:save-draft:rejected` (with a `message`) if the Gate denies, the toggle is off, or the acknowledgement is missing; `compliance-ai:save-draft:success` (with `draft_id`) otherwise.
+
+### Trigger from React / Vue
+
+Hit the REST endpoints directly. They mount at `/api/v1/compliance/ai/*` under the `api` middleware group, guarded by the guard read from `config('artisanpack.compliance.ai.guard')` (default `sanctum`, override via `COMPLIANCE_AI_GUARD`):
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/v1/compliance/ai/features` | GET | Feature-toggle state map. |
+| `/api/v1/compliance/ai/privacy-policy-draft` | POST | Run `PrivacyPolicyDraftAgent`. |
+| `/api/v1/compliance/ai/dpia-assistance` | POST | Run `DpiaAssistanceAgent`. |
+| `/api/v1/compliance/ai/consent-text` | POST | Run `ConsentTextSuggestionAgent`. |
+
+Every response has the shape `{ feature: string, output: object }` on success, or `{ feature: string, error: string, message: string }` on failure. Error codes: `feature_disabled` (403), `missing_credentials` (503), `invalid_input` (422), `internal_error` (500).
+
+### Retrieve draft history
+
+Every save creates a new `AiDraft` row — the model blocks UPDATE at the ORM layer so the audit trail is immutable. Query it with the shipped scopes:
+
+```php
+use ArtisanPackUI\Compliance\Models\AiDraft;
+
+$history = AiDraft::query()
+    ->forFeature( 'compliance.privacy_policy_draft' )
+    ->forSubject( 'main-site' )
+    ->latest( 'created_at' )
+    ->get();
+```
+
 ## Configuration
 
 The published config at `config/artisanpack/compliance.php` exposes:
@@ -190,5 +282,6 @@ The published config at `config/artisanpack/compliance.php` exposes:
 - Report defaults (format, recipient list)
 - Storage disk for portability exports
 - Per-command per-run limits
+- `ai.guard` — auth guard used for the `/api/v1/compliance/ai/*` REST routes (default `sanctum`)
 
 Refer to the file inline comments for the full option set.

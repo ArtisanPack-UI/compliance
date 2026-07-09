@@ -119,6 +119,95 @@ The package ships pluggable interfaces so you can add organization-specific beha
 
 Register implementations in your service provider; the orchestrators discover them via the container.
 
+## AI features
+
+The compliance package ships three optional AI trigger surfaces powered by [`artisanpack-ui/ai`](https://github.com/ArtisanPack-UI/ai). Every one of these is **high-stakes** — output must be reviewed by qualified legal counsel before it goes anywhere near production.
+
+| Feature key | Agent | Default model | Purpose |
+|---|---|---|---|
+| `compliance.privacy_policy_draft` | `PrivacyPolicyDraftAgent` | `claude-opus-4-7` | Draft a starter privacy policy from declared processing activities. |
+| `compliance.dpia_assistance` | `DpiaAssistanceAgent` | `claude-opus-4-7` | Enumerate risks, mitigations, and stakeholder impacts for a DPIA. |
+| `compliance.consent_text` | `ConsentTextSuggestionAgent` | `claude-sonnet-4-6` | Suggest plain-language consent text with reading-level score and jurisdiction notes. |
+
+### Non-negotiable guardrails
+
+Every host that surfaces these agents MUST:
+
+1. **Render an un-dismissable "requires legal review" banner** on every draft. The banner is not decorative — every agent output carries `requires_legal_review: true` and a `review_checklist` array, and both must be shown to the user before they can view the body.
+2. **Gate viewing the draft behind an acknowledgement checkbox**. Users cannot see the generated content until they confirm they understand the draft is not legal advice.
+3. **Never overwrite an existing draft**. Persist every run as a new `AiDraft` row — the model itself blocks updates via a `booted()` guard. This preserves the full version history for legal review.
+
+### Installing the AI dependency
+
+`artisanpack-ui/ai` is a soft dependency — the compliance package boots without it, and the AI surfaces stay unregistered. To enable them:
+
+```bash
+composer require artisanpack-ui/ai
+```
+
+Then set your provider credentials (see the `ai` package README) and toggle the features in `config/artisanpack/ai.php`:
+
+```php
+'features' => [
+    'compliance.privacy_policy_draft' => [ 'enabled' => true ],
+    'compliance.dpia_assistance'      => [ 'enabled' => true ],
+    'compliance.consent_text'         => [ 'enabled' => true ],
+],
+```
+
+### Triggering an agent from Livewire
+
+```blade
+<livewire:ap-compliance-ai-tools />
+
+<button
+    wire:click="$dispatch('compliance-ai:suggest-consent-text', {
+        payload: {
+            purpose: 'Send weekly product update emails',
+            data_categories: ['email address', 'engagement metrics'],
+            audience: 'general public',
+            jurisdiction: 'EU',
+        }
+    })"
+>Suggest consent text</button>
+```
+
+Listen for the result on the browser side:
+
+```js
+Livewire.on('compliance-ai:compliance.consent_text:success', ({ output }) => {
+    // Render the "requires legal review" banner first.
+    // Then render the acknowledgement checkbox.
+    // Only reveal `output.consent_text` after the user acknowledges.
+});
+```
+
+Saving a draft after acknowledgement:
+
+```js
+Livewire.dispatch('compliance-ai:save-draft', {
+    featureKey: 'compliance.consent_text',
+    output: agentOutput,
+    subjectKey: 'marketing-email-consent',
+    metadata: { acknowledged: true, reviewer: 'jane@acme.example' },
+});
+```
+
+The Livewire component rejects any save where `metadata.acknowledged` is not `true`.
+
+### Triggering from React or Vue
+
+Hit the REST endpoints directly — they are mounted at `/api/v1/compliance/ai/*` and gated by `auth:sanctum`:
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/v1/compliance/ai/features` | GET | Feature-toggle state map. |
+| `/api/v1/compliance/ai/privacy-policy-draft` | POST | Run `PrivacyPolicyDraftAgent`. |
+| `/api/v1/compliance/ai/dpia-assistance` | POST | Run `DpiaAssistanceAgent`. |
+| `/api/v1/compliance/ai/consent-text` | POST | Run `ConsentTextSuggestionAgent`. |
+
+Every response follows the shape `{ feature: string, output: object }` on success or `{ feature: string, error: string, message: string }` on failure. Error codes: `feature_disabled` (403), `missing_credentials` (503), `invalid_input` (422), `internal_error` (500).
+
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)

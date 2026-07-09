@@ -15,6 +15,10 @@ declare( strict_types=1 );
 
 namespace ArtisanPackUI\Compliance;
 
+use ArtisanPackUI\Ai\Contracts\FeatureRegistry;
+use ArtisanPackUI\Compliance\Ai\Agents\ConsentTextSuggestionAgent;
+use ArtisanPackUI\Compliance\Ai\Agents\DpiaAssistanceAgent;
+use ArtisanPackUI\Compliance\Ai\Agents\PrivacyPolicyDraftAgent;
 use ArtisanPackUI\Compliance\Compliance\Assessment\DpiaService;
 use ArtisanPackUI\Compliance\Compliance\Assessment\ProcessingActivityService;
 use ArtisanPackUI\Compliance\Compliance\Assessment\RiskCalculator;
@@ -43,10 +47,13 @@ use ArtisanPackUI\Compliance\Events\DataExportCompleted;
 use ArtisanPackUI\Compliance\Events\DataExportRequested;
 use ArtisanPackUI\Compliance\Events\ErasureCompleted;
 use ArtisanPackUI\Compliance\Events\ErasureRequested;
+use ArtisanPackUI\Compliance\Livewire\Ai\AiTools;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 /**
  * Service provider for the Compliance package.
@@ -58,6 +65,55 @@ use Illuminate\Support\ServiceProvider;
  */
 class ComplianceServiceProvider extends ServiceProvider
 {
+    /**
+     * The full set of AI feature keys the compliance package exposes.
+     *
+     * Single source of truth: {@see AiController::features()},
+     * {@see AiTools::enabledFeatures()}, and any host bundle wiring
+     * (React/Vue apps that hit `/api/v1/compliance/ai/features`) all
+     * read from here so a future compliance AI feature only lands in
+     * one place.
+     *
+     * @since 1.1.0
+     *
+     * @var array<int, string>
+     */
+    public const AI_FEATURE_KEYS = [
+        'compliance.privacy_policy_draft',
+        'compliance.dpia_assistance',
+        'compliance.consent_text',
+    ];
+
+    /**
+     * Declare the AI features this package owns.
+     *
+     * Auto-discovered by `artisanpack-ui/ai`'s FeatureRegistry. When the
+     * AI package is absent this method is never called and has no
+     * effect — the compliance package still boots without AI wiring,
+     * and the Livewire component + REST endpoints stay unregistered.
+     *
+     * @since 1.1.0
+     *
+     * @return array<string, array{ agent: class-string, package: string }>
+     */
+    public function aiFeatures(): array
+    {
+        return [
+            'compliance.privacy_policy_draft' => [
+                'agent'   => PrivacyPolicyDraftAgent::class,
+                'package' => 'artisanpack-ui/compliance',
+            ],
+            'compliance.dpia_assistance'      => [
+                'agent'   => DpiaAssistanceAgent::class,
+                'package' => 'artisanpack-ui/compliance',
+            ],
+            'compliance.consent_text'         => [
+                'agent'   => ConsentTextSuggestionAgent::class,
+                'package' => 'artisanpack-ui/compliance',
+            ],
+        ];
+    }
+
     /**
      * Register container bindings.
      */
@@ -108,6 +164,33 @@ class ComplianceServiceProvider extends ServiceProvider
         }
 
         $this->registerComplianceDashboardGate();
+
+        $this->registerAiSurfaces();
+    }
+
+    /**
+     * Registers the compliance AI trigger surfaces (Livewire component +
+     * `/api/v1/compliance/ai/*` REST endpoints).
+     *
+     * Both are guarded on the {@see FeatureRegistry} contract from
+     * `artisanpack-ui/ai`: when the AI package isn't installed the
+     * registrations are skipped so the compliance package still boots.
+     *
+     * @since 1.1.0
+     */
+    protected function registerAiSurfaces(): void
+    {
+        if ( ! interface_exists( FeatureRegistry::class ) ) {
+            return;
+        }
+
+        if ( class_exists( Livewire::class ) ) {
+            Livewire::component( 'ap-compliance-ai-tools', AiTools::class );
+        }
+
+        Route::prefix( 'api/v1/compliance/ai' )
+            ->middleware( 'api' )
+            ->group( __DIR__ . '/Http/routes/ai.php' );
     }
 
     /**
@@ -244,7 +327,11 @@ class ComplianceServiceProvider extends ServiceProvider
     protected function registerComplianceDashboardGate(): void
     {
         if ( ! Gate::has( 'viewComplianceDashboard' ) ) {
-            Gate::define( 'viewComplianceDashboard', fn ( $user ) => false);
+            Gate::define( 'viewComplianceDashboard', fn ( $user ) => false );
+        }
+
+        if ( ! Gate::has( 'manageComplianceAiDrafts' ) ) {
+            Gate::define( 'manageComplianceAiDrafts', fn ( $user ) => false );
         }
     }
 }

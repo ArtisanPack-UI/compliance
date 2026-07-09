@@ -41,14 +41,19 @@
     "artisanpack-ui/core": "^1.0"
   },
   "require-dev": {
+    "artisanpack-ui/ai": "^1.0",
     "artisanpack-ui/code-style": "^1.1",
     "artisanpack-ui/code-style-pint": "^1.1",
     "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
     "friendsofphp/php-cs-fixer": "^3.75",
     "laravel/pint": "^1.26",
+    "livewire/livewire": "^3.6",
     "orchestra/testbench": "^10.2|^11.0",
     "pestphp/pest": "^3.8|^4.0",
     "pestphp/pest-plugin-laravel": "^3.2|^4.0"
+  },
+  "suggest": {
+    "artisanpack-ui/ai": "Recommended ^1.0 — enables the high-stakes compliance AI agents (privacy-policy draft, DPIA assistance, consent-text suggestion). Without it the `aiFeatures()` service-provider hook is a no-op and the AI trigger surfaces (Livewire component + REST endpoints) stay hidden."
   },
   "scripts": {
     "lint": [
@@ -64,9 +69,6 @@
     "allow-plugins": {
       "pestphp/pest-plugin": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
-    },
-    "platform": {
-      "php": "8.2"
     }
   },
   "extra": {
